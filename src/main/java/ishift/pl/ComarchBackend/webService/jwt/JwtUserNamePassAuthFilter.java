@@ -15,8 +15,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 
 
@@ -25,9 +23,9 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
     private final JwtConfig jwtConfig;
     private final AuthenticationManager authenticationManager;
 
-    public JwtUserNamePassAuthFilter(AuthenticationManager authenticationManager,JwtConfig jwtConfig) {
+    public JwtUserNamePassAuthFilter(AuthenticationManager authenticationManager, JwtConfig jwtConfig) {
         this.authenticationManager = authenticationManager;
-        this.jwtConfig=jwtConfig;
+        this.jwtConfig = jwtConfig;
     }
 
     @Override
@@ -35,7 +33,7 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
 
         try {
             UserData userData = new ObjectMapper()
-                    .readValue(request.getInputStream(),UserData.class);
+                    .readValue(request.getInputStream(), UserData.class);
 
             Authentication authentication = new UsernamePasswordAuthenticationToken(userData.getUserName(), userData.getPassword());
 
@@ -58,9 +56,9 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
 
-                Date expDate = jwtConfig.getTokenExpirationDate();
+        Date expDate = jwtConfig.getTokenExpirationDate();
 
-                String token = Jwts.builder()
+        String token = Jwts.builder()
                 .setSubject(authResult.getName())
                 .claim(jwtConfig.authorityMapKey(), authResult.getAuthorities())
                 .setIssuedAt(new Date())
@@ -72,8 +70,6 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
                 jwtConfig.getTokenPrefix() + token);
 
         response.setStatus(HttpStatus.ACCEPTED.value());
-
-        LocalDateTime localDateTime = expDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         response.addHeader(jwtConfig.getExpirationDateHeader(), jwtConfig.returnLocalDateTimeaAsString(expDate));
     }

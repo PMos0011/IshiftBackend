@@ -21,7 +21,7 @@ public class WebConfig implements WebMvcConfigurer {
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("https://panel.ishift.pl"));
+        configuration.setAllowedOrigins(Arrays.asList("https://panel.ishift.pl","http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("X-Requested-With","Origin","Content-Type","Accept","Authorization"));
 

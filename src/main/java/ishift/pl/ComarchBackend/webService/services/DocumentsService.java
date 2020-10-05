@@ -5,7 +5,7 @@ import ishift.pl.ComarchBackend.dataModel.model.DeclarationData;
 
 import java.util.List;
 
-public interface ClientDocumentsService {
+public interface DocumentsService {
 
     List<DeclarationData> getDeclarations(String key);
 }

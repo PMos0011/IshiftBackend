@@ -3,21 +3,20 @@ package ishift.pl.ComarchBackend.webService.controllers;
 
 import ishift.pl.ComarchBackend.ComarchBackendApplication;
 import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
-import ishift.pl.ComarchBackend.webService.services.ClientSynchroService;
+import ishift.pl.ComarchBackend.webService.services.SynchroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin("https://panel.ishift.pl")
-public class ClientSynchroController {
+public class SynchroController {
 
-    private final ClientSynchroService clientSynchroService;
+    private final SynchroService synchroService;
     public static boolean restart;
 
     @Autowired
-    public ClientSynchroController(ClientSynchroService clientSynchroService) {
-        this.clientSynchroService = clientSynchroService;
+    public SynchroController(SynchroService synchroService) {
+        this.synchroService = synchroService;
         restart = false;
     }
 
@@ -25,7 +24,7 @@ public class ClientSynchroController {
     @ResponseStatus(HttpStatus.CREATED)
     public void test1(@RequestBody TransferObject transferObject) {
 
-        clientSynchroService.handleIncomingData(transferObject);
+        synchroService.handleIncomingData(transferObject);
     }
 
     @GetMapping("/synchro")

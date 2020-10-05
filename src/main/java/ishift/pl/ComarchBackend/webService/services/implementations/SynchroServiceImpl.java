@@ -1,6 +1,7 @@
 package ishift.pl.ComarchBackend.webService.services.implementations;
 
 import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
+import ishift.pl.ComarchBackend.dataModel.repository.CompanyDataRepository;
 import ishift.pl.ComarchBackend.dataModel.repository.DeclarationDataRepository;
 import ishift.pl.ComarchBackend.dataModel.repository.DeclarationDetailsRepository;
 import ishift.pl.ComarchBackend.databaseService.configuration.ClientDatabaseContextHolder;
@@ -9,10 +10,14 @@ import ishift.pl.ComarchBackend.databaseService.data.DataBasesListSingleton;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import ishift.pl.ComarchBackend.databaseService.services.DatabaseInitService;
 import ishift.pl.ComarchBackend.databaseService.services.SwapDataService;
+import ishift.pl.ComarchBackend.webDataModel.model.AccountingOffice;
+import ishift.pl.ComarchBackend.webDataModel.model.UserData;
 import ishift.pl.ComarchBackend.webDataModel.model.WebCompanyData;
+import ishift.pl.ComarchBackend.webDataModel.repositiories.AccountingOfficeRepository;
+import ishift.pl.ComarchBackend.webDataModel.repositiories.UserDataRepository;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.WebCompanyDataRepository;
-import ishift.pl.ComarchBackend.webService.controllers.ClientSynchroController;
-import ishift.pl.ComarchBackend.webService.services.ClientSynchroService;
+import ishift.pl.ComarchBackend.webService.controllers.SynchroController;
+import ishift.pl.ComarchBackend.webService.services.SynchroService;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class ClientSynchroServiceImpl implements ClientSynchroService {
+public class SynchroServiceImpl implements SynchroService {
 
     private final DatabaseInitService databaseInitService;
     private final SwapDataService swapDataService;
@@ -29,14 +34,21 @@ public class ClientSynchroServiceImpl implements ClientSynchroService {
     private final DeclarationDetailsRepository declarationDetailsRepository;
     private final WebCompanyDataRepository webCompanyDataRepository;
     private final DataBasesPairListSingleton dataBasesPairListSingleton;
+    private final AccountingOfficeRepository accountingOfficeRepository;
+    private final UserDataRepository userDataRepository;
+    private final CompanyDataRepository companyDataRepository;
 
     @Autowired
-    public ClientSynchroServiceImpl(DatabaseInitService databaseInitService,
-                                    SwapDataService swapDataService,
-                                    DeclarationDataRepository declarationDataRepository,
-                                    DeclarationDetailsRepository declarationDetailsRepository,
-                                    WebCompanyDataRepository webCompanyDataRepository,
-                                    DataBaseAccess dataBaseAccess) {
+    public SynchroServiceImpl(DatabaseInitService databaseInitService,
+                              SwapDataService swapDataService,
+                              DeclarationDataRepository declarationDataRepository,
+                              DeclarationDetailsRepository declarationDetailsRepository,
+                              WebCompanyDataRepository webCompanyDataRepository,
+                              DataBaseAccess dataBaseAccess,
+                              AccountingOfficeRepository accountingOfficeRepository,
+                              UserDataRepository userDataRepository,
+                              CompanyDataRepository companyDataRepository) {
+
         this.databaseInitService = databaseInitService;
         this.swapDataService = swapDataService;
         this.dataBasesListSingleton = DataBasesListSingleton.getInstance(dataBaseAccess);
@@ -44,6 +56,9 @@ public class ClientSynchroServiceImpl implements ClientSynchroService {
         this.declarationDetailsRepository = declarationDetailsRepository;
         this.webCompanyDataRepository = webCompanyDataRepository;
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(webCompanyDataRepository);
+        this.accountingOfficeRepository = accountingOfficeRepository;
+        this.userDataRepository = userDataRepository;
+        this.companyDataRepository = companyDataRepository;
     }
 
     @Override
@@ -56,33 +71,54 @@ public class ClientSynchroServiceImpl implements ClientSynchroService {
                         .findAny()
                         .orElseGet(() -> {
 
-                            System.out.println("Start synchro: "+ transferObject.getDbName());
+                            System.out.println("Start synchro: " + transferObject.getDbName());
+
                             databaseInitService.createNewDatabase(transferObject.getDbName());
                             swapDataService.SaveCompanyData(transferObject);
                             dataBasesListSingleton.getDatabasesList().add(transferObject.getDbName());
 
-                            WebCompanyData webCompanyData = new WebCompanyData(transferObject.getCompanyName(),
-                                    transferObject.getDbName());
+                            UserData officeUser = userDataRepository.findByUserName(transferObject.getLogin());
 
+                            Optional<AccountingOffice> accountingOfficeOptional =accountingOfficeRepository.findByName(transferObject.getAccountancyName());
+
+                            AccountingOffice accountingOffice =
+                                    accountingOfficeOptional.orElse(new AccountingOffice(transferObject.getAccountancyName(),officeUser.getDbId()));
+
+                            WebCompanyData webCompanyData = new WebCompanyData(transferObject.getCompanyName(),
+                                    transferObject.getDbName(), accountingOffice.getRandomId());
+
+                            accountingOfficeRepository.save(accountingOffice);
                             webCompanyDataRepository.save(webCompanyData);
 
                             dataBasesPairListSingleton.getDatabasesList().add(
-                                    new MutablePair<String, String>(webCompanyData.getRandomId(), webCompanyData.getDbName()));
+                                    new MutablePair<>(webCompanyData.getRandomId(), webCompanyData.getDbName()));
 
-                            if (!ClientSynchroController.restart)
-                                ClientSynchroController.restart = true;
+                            UserData userData = new UserData(transferObject.getRegon(),
+                                    "abcd",
+                                    "ROLE_USER",
+                                    webCompanyData.getRandomId());
+
+                            userDataRepository.save(userData);
+
+                            if (!SynchroController.restart)
+                                SynchroController.restart = true;
 
                             return null;
                         }));
 
         existingDB.ifPresent(name -> {
             System.out.println("start copping: " + name);
+
+            ClientDatabaseContextHolder.set(name);
+            companyDataRepository.saveAll(transferObject.getCompanyData());
+
             transferObject.getDeclarationData().forEach(declaration -> {
-                ClientDatabaseContextHolder.set(name);
                 declarationDetailsRepository.saveAll(declaration.getDeclarationDetails());
                 declarationDataRepository.save(declaration);
-                ClientDatabaseContextHolder.clear();
             });
+
+            ClientDatabaseContextHolder.clear();
         });
     }
+
 }

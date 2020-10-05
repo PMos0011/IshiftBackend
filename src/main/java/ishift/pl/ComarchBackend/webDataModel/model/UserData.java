@@ -8,8 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 public class UserData implements UserDetails {
@@ -20,19 +22,24 @@ public class UserData implements UserDetails {
     private String userName;
     private String password;
     private String role;
+    private String dbId;
 
     public UserData() {
     }
 
-    public UserData(String userName, String password, String role) {
+    public UserData(String userName, String password, String role, String dbId) {
         this.userName = userName;
         this.password = password;
         this.role = role;
+        this.dbId = dbId;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority(role));
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        grantedAuthorities.add(new SimpleGrantedAuthority(role));
+        grantedAuthorities.add(new SimpleGrantedAuthority(dbId));
+        return  grantedAuthorities;
     }
 
     @Override
@@ -75,5 +82,9 @@ public class UserData implements UserDetails {
 
     public String getRole() {
         return role;
+    }
+
+    public String getDbId() {
+        return dbId;
     }
 }

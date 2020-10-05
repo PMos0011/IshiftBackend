@@ -2,10 +2,7 @@ package ishift.pl.ComarchBackend.webDataModel.model;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Random;
 
 @Entity
@@ -18,16 +15,18 @@ public class WebCompanyData {
     private String companyName;
     private String dbName;
     private String randomId;
+    private String officeID;
 
     public WebCompanyData() {
     }
 
-    public WebCompanyData(String companyName, String dbName) {
+    public WebCompanyData(String companyName, String dbName, String officeID) {
         this.companyName = companyName;
         this.dbName = dbName;
+        this.officeID = officeID;
 
         this.randomId = RandomStringUtils.randomAlphanumeric(
-                new Random().ints(8,15)
+                new Random().ints(8, 15)
                         .findFirst().getAsInt());
     }
 
@@ -45,5 +44,9 @@ public class WebCompanyData {
 
     public String getRandomId() {
         return randomId;
+    }
+
+    public String getOfficeID() {
+        return officeID;
     }
 }

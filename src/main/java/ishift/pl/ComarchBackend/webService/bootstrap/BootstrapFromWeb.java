@@ -1,4 +1,4 @@
-package ishift.pl.ComarchBackend.webService.Bootstrap;
+package ishift.pl.ComarchBackend.webService.bootstrap;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

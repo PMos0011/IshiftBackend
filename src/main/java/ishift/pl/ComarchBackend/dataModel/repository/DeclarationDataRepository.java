@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface DeclarationDataRepository  extends JpaRepository<DeclarationData, Long> {
 
-    @Query("from DeclarationData where finalna = 1")
-    List<DeclarationData> findAll();
+    @Query("from DeclarationData where finalna = 1 and typDeklaracji < 21 and typDeklaracji <> 11" )
+    List<DeclarationData> findAllSupportedDeclarations();
 }

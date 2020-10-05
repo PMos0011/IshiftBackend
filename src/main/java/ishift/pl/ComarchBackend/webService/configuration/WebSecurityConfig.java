@@ -46,7 +46,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
                 .authorizeRequests()
                 .antMatchers("/synchro").hasRole("ADMIN")
                 .antMatchers("/customers").hasRole("ADMIN")
-                .antMatchers("/documents").hasRole("ADMIN")
+                .antMatchers("/documents").hasAnyRole("ADMIN","USER")
+                .antMatchers("/accOffice").hasAnyRole("ADMIN", "USER")
                 .anyRequest()
                 .authenticated();
     }

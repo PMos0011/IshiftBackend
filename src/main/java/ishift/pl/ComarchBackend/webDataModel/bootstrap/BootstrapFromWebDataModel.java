@@ -1,4 +1,4 @@
-package ishift.pl.ComarchBackend.webDataModel.Bootstrap;
+package ishift.pl.ComarchBackend.webDataModel.bootstrap;
 
 import ishift.pl.ComarchBackend.webDataModel.model.UserData;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.UserDataRepository;
@@ -28,20 +28,19 @@ public class BootstrapFromWebDataModel implements CommandLineRunner {
 
     }
 
-    public void addAdminUser() {
-        UserData userAdmin = new UserData("admin",
-                passwordEncoder.encode("admin"),
-                "ROLE_ADMIN");
-
-        userDataRepository.save(userAdmin);
-    }
-
     public void createUser(){
+
+        if(userDataRepository.findByUserName("admin")==null) {
+            UserData userAdmin = new UserData("admin",
+                    passwordEncoder.encode("admin"),
+                    "ROLE_ADMIN", null);
+
+            userDataRepository.save(userAdmin);}
 
         if(userDataRepository.findByUserName("mb")==null) {
             UserData userAdmin = new UserData("mb",
                     passwordEncoder.encode("mbmbmbmb"),
-                    "ROLE_ADMIN");
+                    "ROLE_ADMIN", "shdnffbcg");
 
             userDataRepository.save(userAdmin);
         }

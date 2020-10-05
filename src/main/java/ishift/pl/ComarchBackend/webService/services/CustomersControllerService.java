@@ -5,7 +5,7 @@ import ishift.pl.ComarchBackend.webDataModel.DTOModel.WebCompanyDataDTO;
 
 import java.util.List;
 
-public interface ClientCustomersControllerService {
+public interface CustomersControllerService {
 
-    List<WebCompanyDataDTO> getCustomersNames();
+    List<WebCompanyDataDTO> getCustomersNames(String id);
 }

@@ -1,4 +1,4 @@
-package ishift.pl.ComarchBackend.databaseService.Bootstrap;
+package ishift.pl.ComarchBackend.databaseService.bootstrap;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
