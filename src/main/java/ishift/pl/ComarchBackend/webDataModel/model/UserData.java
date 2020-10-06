@@ -87,4 +87,12 @@ public class UserData implements UserDetails {
     public String getDbId() {
         return dbId;
     }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

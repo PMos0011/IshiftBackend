@@ -8,4 +8,6 @@ import java.util.List;
 public interface WebCompanyDataRepository extends JpaRepository<WebCompanyData,  Long> {
 
     List<WebCompanyData> findAllByOfficeID(String id);
+
+    WebCompanyData findByRandomId(String id);
 }
