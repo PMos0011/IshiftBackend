@@ -8,4 +8,6 @@ import java.util.List;
 public interface DocumentsService {
 
     List<DeclarationData> getDeclarations(String key);
+
+    DeclarationData getDeclarationById(String key, Long id);
 }

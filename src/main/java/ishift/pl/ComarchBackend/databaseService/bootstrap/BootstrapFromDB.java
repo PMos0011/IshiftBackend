@@ -3,7 +3,6 @@ package ishift.pl.ComarchBackend.databaseService.bootstrap;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ishift.pl.ComarchBackend.dataModel.model.DeclarationData;
 import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
 import ishift.pl.ComarchBackend.dataModel.repository.CompanyDataRepository;
 import ishift.pl.ComarchBackend.dataModel.repository.DeclarationDataRepository;

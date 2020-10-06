@@ -2,6 +2,7 @@ package ishift.pl.ComarchBackend.webService.controllers;
 
 
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.WebCompanyDataDTO;
+import ishift.pl.ComarchBackend.webDataModel.DTOModel.WebCompanyShortDataDTO;
 import ishift.pl.ComarchBackend.webService.services.CustomersControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,8 +24,14 @@ public class CustomersController {
     }
 
     @GetMapping("/customers/{id}")
-    public ResponseEntity<List<WebCompanyDataDTO>> getAllCompanyName(@PathVariable String id) {
+    public ResponseEntity<List<WebCompanyShortDataDTO>> getAllCompanyName(@PathVariable String id) {
 
         return new ResponseEntity<>(customersControllerService.getCustomersNames(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/customer/{id}")
+    public ResponseEntity <WebCompanyDataDTO> getCompanyData(@PathVariable String id) {
+
+        return new ResponseEntity<>(customersControllerService.getCompanyData(id), HttpStatus.OK);
     }
 }

@@ -10,4 +10,5 @@ public interface DeclarationDataRepository  extends JpaRepository<DeclarationDat
 
     @Query("from DeclarationData where finalna = 1 and typDeklaracji < 21 and typDeklaracji <> 11" )
     List<DeclarationData> findAllSupportedDeclarations();
+
 }

@@ -21,7 +21,13 @@ public class DocumentsController {
 
     @GetMapping("/documents/{id}")
     public ResponseEntity<List<DeclarationData>> getCompanyDocuments(@PathVariable String id) {
-        System.out.println(id);
+
         return new ResponseEntity<List<DeclarationData>>(documentsService.getDeclarations(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/documents/{dbId}/{id}")
+    public ResponseEntity<DeclarationData> getCompanyDocuments(@PathVariable String dbId, @PathVariable Long id) {
+
+        return new ResponseEntity<DeclarationData>(documentsService.getDeclarationById(dbId, id), HttpStatus.OK);
     }
 }
