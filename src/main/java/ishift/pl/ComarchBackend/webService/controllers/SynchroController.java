@@ -6,6 +6,7 @@ import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
 import ishift.pl.ComarchBackend.webService.services.SynchroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,10 +22,9 @@ public class SynchroController {
     }
 
     @PostMapping("/synchro")
-    @ResponseStatus(HttpStatus.CREATED)
-    public void test1(@RequestBody TransferObject transferObject) {
+    public ResponseEntity<String> test1(@RequestBody TransferObject transferObject) {
 
-        synchroService.handleIncomingData(transferObject);
+        return new ResponseEntity<String>(synchroService.handleIncomingData(transferObject),HttpStatus.CREATED) ;
     }
 
     @GetMapping("/synchro")

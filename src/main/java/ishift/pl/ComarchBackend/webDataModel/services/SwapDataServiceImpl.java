@@ -1,4 +1,4 @@
-package ishift.pl.ComarchBackend.databaseService.services;
+package ishift.pl.ComarchBackend.webDataModel.services;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,12 +19,12 @@ public class SwapDataServiceImpl  implements SwapDataService{
     }
 
     @Override
-    public void SaveCompanyData(TransferObject transferObject) {
+    public void saveCompanyData(TransferObject transferObject) {
         Swap swap = new Swap();
         swap.setDatabaseName(transferObject.getDbName());
 
         try {
-            swap.setCustomerData(new ObjectMapper().writeValueAsBytes(transferObject.getDeclarationData()));
+            swap.setCustomerData(new ObjectMapper().writeValueAsBytes(transferObject));
             swapRepository.save(swap);
 
         } catch (JsonProcessingException e) {

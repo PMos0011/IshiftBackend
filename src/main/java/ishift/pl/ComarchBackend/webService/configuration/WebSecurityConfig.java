@@ -2,19 +2,15 @@ package ishift.pl.ComarchBackend.webService.configuration;
 
 
 
-import ishift.pl.ComarchBackend.databaseService.services.UserDetailsServiceImpl;
+import ishift.pl.ComarchBackend.webDataModel.services.UserDetailsServiceImpl;
 import ishift.pl.ComarchBackend.webService.jwt.JwtConfig;
 import ishift.pl.ComarchBackend.webService.jwt.JwtTokenVerify;
 import ishift.pl.ComarchBackend.webService.jwt.JwtUserNamePassAuthFilter;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter

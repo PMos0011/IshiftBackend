@@ -1,4 +1,4 @@
-package ishift.pl.ComarchBackend.databaseService.services;
+package ishift.pl.ComarchBackend.webDataModel.services;
 
 import ishift.pl.ComarchBackend.webDataModel.repositiories.UserDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;

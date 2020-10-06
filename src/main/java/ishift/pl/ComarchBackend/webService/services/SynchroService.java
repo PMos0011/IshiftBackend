@@ -5,5 +5,5 @@ import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
 
 public interface SynchroService {
 
-    void handleIncomingData(TransferObject transferObject);
+    String handleIncomingData(TransferObject transferObject);
 }

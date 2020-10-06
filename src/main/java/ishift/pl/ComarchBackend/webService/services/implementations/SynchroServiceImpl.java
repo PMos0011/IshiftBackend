@@ -9,7 +9,7 @@ import ishift.pl.ComarchBackend.databaseService.configuration.DataBaseAccess;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesListSingleton;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import ishift.pl.ComarchBackend.databaseService.services.DatabaseInitService;
-import ishift.pl.ComarchBackend.databaseService.services.SwapDataService;
+import ishift.pl.ComarchBackend.webDataModel.services.SwapDataService;
 import ishift.pl.ComarchBackend.webDataModel.model.AccountingOffice;
 import ishift.pl.ComarchBackend.webDataModel.model.UserData;
 import ishift.pl.ComarchBackend.webDataModel.model.WebCompanyData;
@@ -18,11 +18,14 @@ import ishift.pl.ComarchBackend.webDataModel.repositiories.UserDataRepository;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.WebCompanyDataRepository;
 import ishift.pl.ComarchBackend.webService.controllers.SynchroController;
 import ishift.pl.ComarchBackend.webService.services.SynchroService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class SynchroServiceImpl implements SynchroService {
@@ -37,6 +40,7 @@ public class SynchroServiceImpl implements SynchroService {
     private final AccountingOfficeRepository accountingOfficeRepository;
     private final UserDataRepository userDataRepository;
     private final CompanyDataRepository companyDataRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public SynchroServiceImpl(DatabaseInitService databaseInitService,
@@ -47,7 +51,8 @@ public class SynchroServiceImpl implements SynchroService {
                               DataBaseAccess dataBaseAccess,
                               AccountingOfficeRepository accountingOfficeRepository,
                               UserDataRepository userDataRepository,
-                              CompanyDataRepository companyDataRepository) {
+                              CompanyDataRepository companyDataRepository,
+                              PasswordEncoder passwordEncoder) {
 
         this.databaseInitService = databaseInitService;
         this.swapDataService = swapDataService;
@@ -59,10 +64,13 @@ public class SynchroServiceImpl implements SynchroService {
         this.accountingOfficeRepository = accountingOfficeRepository;
         this.userDataRepository = userDataRepository;
         this.companyDataRepository = companyDataRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public void handleIncomingData(TransferObject transferObject) {
+    public String handleIncomingData(TransferObject transferObject) {
+
+        AtomicReference<String> newClientPassword = new AtomicReference<>();
 
         Optional<String> existingDB = Optional.ofNullable(
 
@@ -74,7 +82,7 @@ public class SynchroServiceImpl implements SynchroService {
                             System.out.println("Start synchro: " + transferObject.getDbName());
 
                             databaseInitService.createNewDatabase(transferObject.getDbName());
-                            swapDataService.SaveCompanyData(transferObject);
+                            swapDataService.saveCompanyData(transferObject);
                             dataBasesListSingleton.getDatabasesList().add(transferObject.getDbName());
 
                             UserData officeUser = userDataRepository.findByUserName(transferObject.getLogin());
@@ -93,8 +101,10 @@ public class SynchroServiceImpl implements SynchroService {
                             dataBasesPairListSingleton.getDatabasesList().add(
                                     new MutablePair<>(webCompanyData.getRandomId(), webCompanyData.getDbName()));
 
+                            newClientPassword.set(RandomStringUtils.randomAlphanumeric(8));
+
                             UserData userData = new UserData(transferObject.getRegon(),
-                                    "abcd",
+                                    passwordEncoder.encode(newClientPassword.get()),
                                     "ROLE_USER",
                                     webCompanyData.getRandomId());
 
@@ -119,6 +129,8 @@ public class SynchroServiceImpl implements SynchroService {
 
             ClientDatabaseContextHolder.clear();
         });
+
+        return newClientPassword.get();
     }
 
 }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ishift.pl.ComarchBackend.dataModel.model.DeclarationData;
+import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
+import ishift.pl.ComarchBackend.dataModel.repository.CompanyDataRepository;
 import ishift.pl.ComarchBackend.dataModel.repository.DeclarationDataRepository;
 import ishift.pl.ComarchBackend.dataModel.repository.DeclarationDetailsRepository;
 import ishift.pl.ComarchBackend.databaseService.configuration.ClientDatabaseContextHolder;
@@ -29,17 +31,20 @@ public class BootstrapFromDB implements CommandLineRunner {
     private final DeclarationDataRepository declarationDataRepository;
     private final DeclarationDetailsRepository declarationDetailsRepository;
     private final DataBasesPairListSingleton dataBasesPairListSingleton;
+    private final CompanyDataRepository companyDataRepository;
 
     @Autowired
     public BootstrapFromDB(SwapRepository swapRepository, DeclarationDataRepository declarationDataRepository,
                            DeclarationDetailsRepository declarationDetailsRepository,
                            WebCompanyDataRepository webCompanyDataRepository,
-                           DataBaseAccess dataBaseAccess) {
+                           DataBaseAccess dataBaseAccess,
+                           CompanyDataRepository companyDataRepository) {
         this.swapRepository = swapRepository;
         this.dataBasesListSingleton = DataBasesListSingleton.getInstance(dataBaseAccess);
         this.declarationDataRepository = declarationDataRepository;
         this.declarationDetailsRepository = declarationDetailsRepository;
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(webCompanyDataRepository);
+        this.companyDataRepository = companyDataRepository;
     }
 
     @Override
@@ -67,9 +72,12 @@ public class BootstrapFromDB implements CommandLineRunner {
                     ClientDatabaseContextHolder.set(name);
                     System.out.println(name);
                     try {
-                        List<DeclarationData> decl = new ObjectMapper().readValue(swap.getCustomerData(), new TypeReference<List<DeclarationData>>() {
-                        });
-                        decl.forEach(d -> {
+                        TransferObject transferObject = new ObjectMapper().readValue(
+                                swap.getCustomerData(), new TypeReference<>() {});
+
+                        companyDataRepository.saveAll(transferObject.getCompanyData());
+
+                        transferObject.getDeclarationData().forEach(d -> {
                             declarationDetailsRepository.saveAll(d.getDeclarationDetails());
                             declarationDataRepository.save(d);
                         });
