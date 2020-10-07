@@ -1,11 +1,9 @@
 package ishift.pl.ComarchBackend.webService.services;
 
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.UserDataDTO;
-import ishift.pl.ComarchBackend.webDataModel.DTOModel.UsersListDTO;
+import org.springframework.http.ResponseEntity;
 
 public interface UserAccessService {
 
-    boolean changeUserAccessData(UserDataDTO userDataDTO);
-
-    UsersListDTO getUsersList();
+    ResponseEntity<String> changeUserAccessData(UserDataDTO userDataDTO);
 }

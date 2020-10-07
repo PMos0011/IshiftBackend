@@ -85,7 +85,8 @@ public class SynchroServiceImpl implements SynchroService {
                             swapDataService.saveCompanyData(transferObject);
                             dataBasesListSingleton.getDatabasesList().add(transferObject.getDbName());
 
-                            UserData officeUser = userDataRepository.findByUserName(transferObject.getLogin());
+                            //TODO orElse(null)
+                            UserData officeUser = userDataRepository.findByUserName(transferObject.getLogin()).orElse(null);
 
                             Optional<AccountingOffice> accountingOfficeOptional =accountingOfficeRepository.findByName(transferObject.getAccountancyName());
 
