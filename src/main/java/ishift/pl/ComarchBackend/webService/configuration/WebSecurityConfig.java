@@ -40,7 +40,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
                 .addFilter(new JwtUserNamePassAuthFilter(authenticationManager(),jwtConfig))
                 .addFilterAfter(new JwtTokenVerify(jwtConfig),JwtUserNamePassAuthFilter.class)
                 .authorizeRequests()
-                .antMatchers("/synchro").hasRole("ADMIN")
+                .antMatchers("/synchro/*").hasRole("ADMIN")
                 .antMatchers("/customers").hasRole("ADMIN")
                 .antMatchers("/documents").authenticated()
                 .antMatchers("/accOffice").authenticated()

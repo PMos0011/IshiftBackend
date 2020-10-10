@@ -2,6 +2,7 @@ package ishift.pl.ComarchBackend.dataModel.model;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -25,6 +26,9 @@ public class DeclarationData {
 
     @Column(name = "DkN_PraID")
     private Integer praID;
+
+    @Column(name = "DkN_TS_Mod")
+    private Date modDate;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "DkW_DkNID", updatable = false, insertable = false)

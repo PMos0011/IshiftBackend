@@ -9,8 +9,8 @@ public class TransferObject {
     private  String accountancyName;
     private  String login;
     private  String regon;
-    private  List<DeclarationData> declarationData;
     private  List<CompanyData> companyData;
+    private List<BankAccount> bankAccounts;
 
     public TransferObject() {
     }
@@ -20,15 +20,15 @@ public class TransferObject {
                           String accountancyName,
                           String login,
                           String regon,
-                          List <DeclarationData> declarationData,
-                          List<CompanyData> companyData) {
+                          List<CompanyData> companyData,
+                          List<BankAccount> bankAccounts) {
         this.dbName = dbName;
         this.companyName = companyName;
         this.accountancyName = accountancyName;
         this.login = login;
         this.regon = regon;
-        this.declarationData = declarationData;
         this.companyData = companyData;
+        this.bankAccounts = bankAccounts;
     }
 
 
@@ -72,19 +72,19 @@ public class TransferObject {
         this.regon = regon;
     }
 
-    public List<DeclarationData> getDeclarationData() {
-        return declarationData;
-    }
-
-    public void setDeclarationData(List<DeclarationData> declarationData) {
-        this.declarationData = declarationData;
-    }
-
     public List<CompanyData> getCompanyData() {
         return companyData;
     }
 
     public void setCompanyData(List<CompanyData> companyData) {
         this.companyData = companyData;
+    }
+
+    public List<BankAccount> getBankAccounts() {
+        return bankAccounts;
+    }
+
+    public void setBankAccounts(List<BankAccount> bankAccounts) {
+        this.bankAccounts = bankAccounts;
     }
 }

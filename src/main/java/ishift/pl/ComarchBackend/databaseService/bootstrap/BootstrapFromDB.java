@@ -3,10 +3,9 @@ package ishift.pl.ComarchBackend.databaseService.bootstrap;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ishift.pl.ComarchBackend.dataModel.model.DeclarationData;
 import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
-import ishift.pl.ComarchBackend.dataModel.repository.CompanyDataRepository;
-import ishift.pl.ComarchBackend.dataModel.repository.DeclarationDataRepository;
-import ishift.pl.ComarchBackend.dataModel.repository.DeclarationDetailsRepository;
+import ishift.pl.ComarchBackend.dataModel.repository.*;
 import ishift.pl.ComarchBackend.databaseService.configuration.ClientDatabaseContextHolder;
 import ishift.pl.ComarchBackend.databaseService.configuration.DataBaseAccess;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesListSingleton;
@@ -31,19 +30,25 @@ public class BootstrapFromDB implements CommandLineRunner {
     private final DeclarationDetailsRepository declarationDetailsRepository;
     private final DataBasesPairListSingleton dataBasesPairListSingleton;
     private final CompanyDataRepository companyDataRepository;
+    private final BankDataRepository bankDataRepository;
+    private final BankAccountRepository bankAccountRepository;
 
     @Autowired
     public BootstrapFromDB(SwapRepository swapRepository, DeclarationDataRepository declarationDataRepository,
                            DeclarationDetailsRepository declarationDetailsRepository,
                            WebCompanyDataRepository webCompanyDataRepository,
                            DataBaseAccess dataBaseAccess,
-                           CompanyDataRepository companyDataRepository) {
+                           CompanyDataRepository companyDataRepository,
+                           BankDataRepository bankDataRepository,
+                           BankAccountRepository bankAccountRepository) {
         this.swapRepository = swapRepository;
         this.dataBasesListSingleton = DataBasesListSingleton.getInstance(dataBaseAccess);
         this.declarationDataRepository = declarationDataRepository;
         this.declarationDetailsRepository = declarationDetailsRepository;
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(webCompanyDataRepository);
         this.companyDataRepository = companyDataRepository;
+        this.bankAccountRepository = bankAccountRepository;
+        this.bankDataRepository = bankDataRepository;
     }
 
     @Override
@@ -69,28 +74,42 @@ public class BootstrapFromDB implements CommandLineRunner {
 
                 existingDB.map(name -> {
                     ClientDatabaseContextHolder.set(name);
+                    System.out.println("kopiuję");
                     System.out.println(name);
                     try {
-                        TransferObject transferObject = new ObjectMapper().readValue(
-                                swap.getCustomerData(), new TypeReference<>() {});
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        TransferObject transferObject = objectMapper.readValue(
+                                swap.getCustomerData(), new TypeReference<>() {
+                                });
 
                         companyDataRepository.saveAll(transferObject.getCompanyData());
 
-                        transferObject.getDeclarationData().forEach(d -> {
-                            declarationDetailsRepository.saveAll(d.getDeclarationDetails());
-                            declarationDataRepository.save(d);
+                        transferObject.getBankAccounts().forEach(acc -> {
+                            bankDataRepository.save(acc.getBankData());
+                            bankAccountRepository.save(acc);
+                        });
+
+                        List<DeclarationData> declarationDataList = objectMapper.readValue(
+                                swap.getDeclarationData(), new TypeReference<>() {
+                                });
+
+                        declarationDataList.forEach(doc ->{
+                            declarationDetailsRepository.saveAll(doc.getDeclarationDetails());
+                            declarationDataRepository.save(doc);
                         });
 
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
                     ClientDatabaseContextHolder.clear();
                     swapRepository.delete(swap);
                     return name;
 
-                }).orElseGet(()-> {
+                }).orElseGet(() -> {
                     swapRepository.delete(swap);
                     //TODO
+                    //error handling
                     System.out.println("error getting data from swap");
                     return null;
                 });

@@ -2,12 +2,16 @@ package ishift.pl.ComarchBackend.webService.controllers;
 
 
 import ishift.pl.ComarchBackend.ComarchBackendApplication;
+import ishift.pl.ComarchBackend.dataModel.model.BankAccount;
+import ishift.pl.ComarchBackend.dataModel.model.DeclarationData;
 import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
 import ishift.pl.ComarchBackend.webService.services.SynchroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class SynchroController {
@@ -21,10 +25,16 @@ public class SynchroController {
         restart = false;
     }
 
-    @PostMapping("/synchro")
-    public ResponseEntity<String> test1(@RequestBody TransferObject transferObject) {
+    @PostMapping("/synchro/transferObject")
+    public ResponseEntity<String> getTransferObject(@RequestBody TransferObject transferObject) {
 
-        return new ResponseEntity<String>(synchroService.handleIncomingData(transferObject),HttpStatus.CREATED) ;
+        return synchroService.setNewClientData(transferObject) ;
+    }
+
+    @PostMapping("/synchro/documents/{id}")
+    public ResponseEntity<String> getBankData(@PathVariable String id , @RequestBody List<DeclarationData> declarationData) {
+
+        return synchroService.handleNewDeclarationData(declarationData, id);
     }
 
     @GetMapping("/synchro")

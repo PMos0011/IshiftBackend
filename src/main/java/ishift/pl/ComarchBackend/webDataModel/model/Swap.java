@@ -12,6 +12,8 @@ public class Swap {
     private String databaseName;
     @Lob
     private byte[] customerData;
+    @Lob
+    private byte[] declarationData;
 
     public Long getId() {
         return id;
@@ -35,5 +37,13 @@ public class Swap {
 
     public void setCustomerData(byte[] customerData) {
         this.customerData = customerData;
+    }
+
+    public byte[] getDeclarationData() {
+        return declarationData;
+    }
+
+    public void setDeclarationData(byte[] declarationData) {
+        this.declarationData = declarationData;
     }
 }
