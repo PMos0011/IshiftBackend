@@ -1,4 +1,4 @@
-package ishift.pl.ComarchBackend.webDataModel.services;
+package ishift.pl.ComarchBackend.webDataModel.services.implementations;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -9,6 +9,7 @@ import ishift.pl.ComarchBackend.dataModel.model.DeclarationData;
 import ishift.pl.ComarchBackend.dataModel.model.TransferObject;
 import ishift.pl.ComarchBackend.webDataModel.model.Swap;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.SwapRepository;
+import ishift.pl.ComarchBackend.webDataModel.services.SwapService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,9 +40,10 @@ public class SwapServiceImpl implements SwapService {
 
     @Override
     public void saveDeclarationData(List<DeclarationData> declarationDataList, String dbName) throws RuntimeException {
-        Optional<Swap> swapOptional = swapRepository.findByDatabaseName(dbName);
 
-        Swap swap = swapOptional.orElseThrow(()->new RuntimeException("brak rekordu swap"));
+        Swap swap = swapRepository.findByDatabaseName(dbName)
+                .orElse(new Swap(dbName));
+
         try {
             swap.setDeclarationData(new ObjectMapper().writeValueAsBytes(declarationDataList));
             swapRepository.save(swap);

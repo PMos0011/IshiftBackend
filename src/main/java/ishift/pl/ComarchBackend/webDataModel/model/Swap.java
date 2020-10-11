@@ -15,6 +15,13 @@ public class Swap {
     @Lob
     private byte[] declarationData;
 
+    public Swap() {
+    }
+
+    public Swap(String databaseName) {
+        this.databaseName = databaseName;
+    }
+
     public Long getId() {
         return id;
     }

@@ -45,12 +45,6 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
         }
     }
 
-//    @Override
-//    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-//        response.setHeader(jwtConfig.getAuthorizationHeader(), "userNotFound");
-//        response.sendError(403);
-//    }
-
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
@@ -73,6 +67,4 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
 
         response.addHeader(jwtConfig.getExpirationDateHeader(), jwtConfig.returnLocalDateTimeaAsString(expDate));
     }
-
-
 }

@@ -9,5 +9,5 @@ public interface AccountingOfficeRepository extends JpaRepository<AccountingOffi
 
     Optional<AccountingOffice> findByName (String name);
 
-    AccountingOffice findByRandomId(String id);
+    Optional<AccountingOffice> findByRandomId(String id);
 }

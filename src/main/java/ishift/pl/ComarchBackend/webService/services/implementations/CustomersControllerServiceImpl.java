@@ -43,9 +43,11 @@ public class CustomersControllerServiceImpl implements CustomersControllerServic
         WebCompanyDataDTO webCompanyDataDTO = new WebCompanyDataDTO();
 
         ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
+
         webCompanyDataDTO.setCompanyName(companyDataRepository.getCompanyName().getCompanyData());
         webCompanyDataDTO.setCompanyData(companyDataRepository.findAll());
         webCompanyDataDTO.setCompanyId(id);
+
         ClientDatabaseContextHolder.clear();
 
         return webCompanyDataDTO;

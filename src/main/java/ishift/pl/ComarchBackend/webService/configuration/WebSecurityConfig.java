@@ -2,7 +2,7 @@ package ishift.pl.ComarchBackend.webService.configuration;
 
 
 
-import ishift.pl.ComarchBackend.webDataModel.services.UserDetailsServiceImpl;
+import ishift.pl.ComarchBackend.webDataModel.services.implementations.UserDetailsServiceImpl;
 import ishift.pl.ComarchBackend.webService.jwt.JwtConfig;
 import ishift.pl.ComarchBackend.webService.jwt.JwtTokenVerify;
 import ishift.pl.ComarchBackend.webService.jwt.JwtUserNamePassAuthFilter;

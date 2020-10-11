@@ -2,6 +2,7 @@ package ishift.pl.ComarchBackend.webService.controllers;
 
 import ishift.pl.ComarchBackend.dataModel.model.DeclarationData;
 import ishift.pl.ComarchBackend.webService.services.DocumentsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ public class DocumentsController {
 
     private final DocumentsService documentsService;
 
+    @Autowired
     public DocumentsController(DocumentsService documentsService) {
         this.documentsService = documentsService;
     }

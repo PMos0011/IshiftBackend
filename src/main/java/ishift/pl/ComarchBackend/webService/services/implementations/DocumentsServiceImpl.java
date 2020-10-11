@@ -55,10 +55,11 @@ public class DocumentsServiceImpl implements DocumentsService {
         Optional<DeclarationData> declarationData = declarationDataRepository.findById(id);
         ClientDatabaseContextHolder.clear();
 
+        //todo
         return declarationData.get();
     }
 
-    public boolean detailFilter(DeclarationDetails d) {
+    private boolean detailFilter(DeclarationDetails d) {
 
         try {
             String tmp = d.getValue().replace(",", "");

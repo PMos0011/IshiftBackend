@@ -1,6 +1,8 @@
 package ishift.pl.ComarchBackend.databaseService.services;
 
 import ishift.pl.ComarchBackend.databaseService.configuration.DataBaseAccess;
+import ishift.pl.ComarchBackend.databaseService.data.DataBasesListSingleton;
+import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -19,14 +21,17 @@ import java.util.List;
 public class DatabaseInitServiceImpl implements DatabaseInitService {
 
     private final DataBaseAccess dataBaseAccess;
+    private final DataBasesListSingleton dataBasesListSingleton;
 
     @Autowired
     public DatabaseInitServiceImpl(DataBaseAccess dataBaseAccess) {
         this.dataBaseAccess = dataBaseAccess;
+        this.dataBasesListSingleton = DataBasesListSingleton.getInstance(dataBaseAccess);
     }
 
     @Override
-    public void createNewDatabase(String dbName) {
+    public void createNewDatabaseAndAddToDataBasesListSingleton(String dbName) {
+
         try (Connection conn = DriverManager.getConnection(
                 dataBaseAccess.getUrl(),
                 dataBaseAccess.getUser(),
@@ -36,7 +41,11 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
             stmt.executeUpdate(sql);
             stmt.close();
             createTable(dbName, readTableQueryData());
+
+            dataBasesListSingleton.getDatabasesList().add(dbName);
+
         } catch (SQLException throwables) {
+            //todo
             throwables.printStackTrace();
         }
 
@@ -53,6 +62,7 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
             try {
                 stmt.execute(query);
             } catch (SQLException throwables) {
+                //todo
                 throwables.printStackTrace();
             }
         });
@@ -72,6 +82,7 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
                 queryList.add(line);
 
         } catch (Exception e) {
+            //todo
             return null;
         }
 
