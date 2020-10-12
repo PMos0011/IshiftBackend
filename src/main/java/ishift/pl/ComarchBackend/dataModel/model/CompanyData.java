@@ -36,4 +36,14 @@ public class CompanyData {
     public String getDataDescription() {
         return dataDescription;
     }
+
+    @Override
+    public String toString() {
+        return "CompanyData{" +
+                "id=" + id +
+                ", companyNumber=" + companyNumber +
+                ", companyData='" + companyData + '\'' +
+                ", dataDescription='" + dataDescription + '\'' +
+                '}';
+    }
 }

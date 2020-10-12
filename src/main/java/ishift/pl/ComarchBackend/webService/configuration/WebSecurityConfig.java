@@ -44,7 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
                 .antMatchers("/customers").hasRole("ADMIN")
                 .antMatchers("/documents").authenticated()
                 .antMatchers("/accOffice").authenticated()
-                .antMatchers("/accessData").authenticated()
+                .antMatchers("/settings").authenticated()
                 .anyRequest().authenticated();
     }
 
