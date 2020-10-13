@@ -8,4 +8,8 @@ import java.util.List;
 public interface BankAccountsControllerService {
 
     ResponseEntity<List<BankAccountData>> getAllBankAccounts(String id);
+
+    ResponseEntity<List<BankAccountData>> saveBankAccount(BankAccountData bankAccountData, String dbId);
+
+    ResponseEntity<List<BankAccountData>> deleteBankAccount(String dbId, Long id);
 }

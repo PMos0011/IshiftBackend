@@ -1,5 +1,5 @@
 create table accounting_office (id bigint not null auto_increment, name varchar(255), random_id varchar(255), primary key (id)) engine=InnoDB;
-create table bank_account_data (id bigint not null auto_increment, city varchar(255), account_number varchar(255), bank_name varchar(255), local_number varchar(255), street varchar(255), street_number varchar(255), zip_code varchar(255), primary key (id)) engine=InnoDB;
+create table bank_account_data (id bigint not null auto_increment, account_number varchar(255), bank_name varchar(255), city varchar(255), local_number varchar(255), street varchar(255), street_number varchar(255), zip_code varchar(255), primary key (id)) engine=InnoDB;
 create table cdn_bnk_nazwy (bna_bna_id bigint not null, bna_miasto varchar(255), bna_nr_lokalu varchar(255), bna_nazwa1 varchar(255), bna_nazwa2 varchar(255), bna_ulica varchar(255), bna_nr_domu varchar(255), bna_kod_pocztowy varchar(255), primary key (bna_bna_id)) engine=InnoDB;
 create table cdn_bnk_rachunki (bra_braid bigint not null, bra_rachunek_nr varchar(255), bra_bnaid integer, primary key (bra_braid)) engine=InnoDB;
 create table cdn_dekl_nag (dkn_dknid bigint not null, dkn_finalna integer, dkn_kwota decimal(19,2), dkn_ts_mod date, dkn_praid integer, dkn_rok_miesiac integer, dkn_typ_deklar integer, primary key (dkn_dknid)) engine=InnoDB;

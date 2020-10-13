@@ -5,6 +5,7 @@ import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import ishift.pl.ComarchBackend.webDataModel.model.BankAccountData;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.BankAccountDataRepository;
 import ishift.pl.ComarchBackend.webService.services.BankAccountsControllerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class BankAccountsControllerServiceImpl implements BankAccountsController
     private final BankAccountDataRepository bankAccountDataRepository;
     private final DataBasesPairListSingleton dataBasesPairListSingleton;
 
+    @Autowired
     public BankAccountsControllerServiceImpl(BankAccountDataRepository bankAccountDataRepository) {
         this.bankAccountDataRepository = bankAccountDataRepository;
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(null);
@@ -30,5 +32,25 @@ public class BankAccountsControllerServiceImpl implements BankAccountsController
         ClientDatabaseContextHolder.clear();
 
         return new ResponseEntity<>(bankAccountList, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<BankAccountData>> saveBankAccount(BankAccountData bankAccountData, String dbId) {
+
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(dbId));
+        bankAccountDataRepository.save(bankAccountData);
+        ClientDatabaseContextHolder.clear();
+
+        return getAllBankAccounts(dbId);
+    }
+
+    @Override
+    public ResponseEntity<List<BankAccountData>> deleteBankAccount(String dbId, Long id) {
+
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(dbId));
+        bankAccountDataRepository.deleteById(id);
+        ClientDatabaseContextHolder.clear();
+
+        return getAllBankAccounts(dbId);
     }
 }

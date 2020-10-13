@@ -3,9 +3,7 @@ package ishift.pl.ComarchBackend.webService.controllers;
 import ishift.pl.ComarchBackend.webDataModel.model.BankAccountData;
 import ishift.pl.ComarchBackend.webService.services.BankAccountsControllerService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,5 +20,17 @@ public class BankAccountsController {
     public ResponseEntity<List<BankAccountData>> getAllBankAccounts(@PathVariable String id) {
 
         return bankAccountsControllerService.getAllBankAccounts(id);
+    }
+
+    @PutMapping("/bankAccounts/{id}")
+    public ResponseEntity<List<BankAccountData>> saveBankAccount(@PathVariable String id, @RequestBody BankAccountData bankAccountData) {
+
+        return bankAccountsControllerService.saveBankAccount(bankAccountData, id);
+    }
+
+    @DeleteMapping("/bankAccounts/{dbId}/{id}")
+    public ResponseEntity<List<BankAccountData>> deleteBankAccount(@PathVariable String dbId, @PathVariable Long id) {
+
+        return bankAccountsControllerService.deleteBankAccount(dbId, id);
     }
 }

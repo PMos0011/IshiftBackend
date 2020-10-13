@@ -95,6 +95,6 @@ public class BankAccountData {
     }
 
     public void setCity(String city) {
-        city = city;
+        this.city = city;
     }
 }
