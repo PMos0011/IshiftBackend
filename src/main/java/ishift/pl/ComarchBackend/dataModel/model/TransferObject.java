@@ -4,13 +4,15 @@ import java.util.List;
 
 public class TransferObject {
 
-    private  String dbName;
-    private  String companyName;
-    private  String accountancyName;
-    private  String login;
-    private  String regon;
-    private  List<CompanyData> companyData;
+    private String dbName;
+    private String companyName;
+    private String accountancyName;
+    private String login;
+    private String regon;
+    private List<CompanyData> companyData;
     private List<BankAccount> bankAccounts;
+    private List<Contractor> contractorList;
+    private List<Invoice> invoiceList;
 
     public TransferObject() {
     }
@@ -18,10 +20,11 @@ public class TransferObject {
     public TransferObject(String dbName,
                           String companyName,
                           String accountancyName,
-                          String login,
-                          String regon,
+                          String login, String regon,
                           List<CompanyData> companyData,
-                          List<BankAccount> bankAccounts) {
+                          List<BankAccount> bankAccounts,
+                          List<Contractor> contractorList,
+                          List<Invoice> invoiceList) {
         this.dbName = dbName;
         this.companyName = companyName;
         this.accountancyName = accountancyName;
@@ -29,8 +32,9 @@ public class TransferObject {
         this.regon = regon;
         this.companyData = companyData;
         this.bankAccounts = bankAccounts;
+        this.contractorList = contractorList;
+        this.invoiceList = invoiceList;
     }
-
 
     public String getDbName() {
         return dbName;
@@ -86,5 +90,21 @@ public class TransferObject {
 
     public void setBankAccounts(List<BankAccount> bankAccounts) {
         this.bankAccounts = bankAccounts;
+    }
+
+    public List<Contractor> getContractorList() {
+        return contractorList;
+    }
+
+    public void setContractorList(List<Contractor> contractorList) {
+        this.contractorList = contractorList;
+    }
+
+    public List<Invoice> getInvoiceList() {
+        return invoiceList;
+    }
+
+    public void setInvoiceList(List<Invoice> invoiceList) {
+        this.invoiceList = invoiceList;
     }
 }

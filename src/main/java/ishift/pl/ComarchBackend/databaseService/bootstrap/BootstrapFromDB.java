@@ -14,6 +14,8 @@ import ishift.pl.ComarchBackend.webDataModel.model.Swap;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.SwapRepository;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.WebCompanyDataRepository;
 import ishift.pl.ComarchBackend.webDataModel.services.BankAccountDataService;
+import ishift.pl.ComarchBackend.webDataModel.services.WebContractorService;
+import ishift.pl.ComarchBackend.webDataModel.services.WebInvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,8 @@ public class BootstrapFromDB implements CommandLineRunner {
     private final DataBasesPairListSingleton dataBasesPairListSingleton;
     private final CompanyDataRepository companyDataRepository;
     private final BankAccountDataService bankAccountDataService;
+    private final WebContractorService webContractorService;
+    private final WebInvoiceService webInvoiceService;
 
     @Autowired
     public BootstrapFromDB(SwapRepository swapRepository, DeclarationDataRepository declarationDataRepository,
@@ -39,7 +43,9 @@ public class BootstrapFromDB implements CommandLineRunner {
                            WebCompanyDataRepository webCompanyDataRepository,
                            DataBaseAccess dataBaseAccess,
                            CompanyDataRepository companyDataRepository,
-                           BankAccountDataService bankAccountDataService) {
+                           BankAccountDataService bankAccountDataService,
+                           WebContractorService webContractorService,
+                           WebInvoiceService webInvoiceService) {
         this.swapRepository = swapRepository;
         this.dataBasesListSingleton = DataBasesListSingleton.getInstance(dataBaseAccess);
         this.declarationDataRepository = declarationDataRepository;
@@ -47,6 +53,9 @@ public class BootstrapFromDB implements CommandLineRunner {
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(webCompanyDataRepository);
         this.companyDataRepository = companyDataRepository;
         this.bankAccountDataService = bankAccountDataService;
+        this.webContractorService = webContractorService;
+        this.webInvoiceService = webInvoiceService;
+
     }
 
     @Override
@@ -88,10 +97,14 @@ public class BootstrapFromDB implements CommandLineRunner {
                                 swap.getDeclarationData(), new TypeReference<>() {
                                 });
 
-                        declarationDataList.forEach(doc ->{
+                        declarationDataList.forEach(doc -> {
                             declarationDetailsRepository.saveAll(doc.getDeclarationDetails());
                             declarationDataRepository.save(doc);
                         });
+
+                        webContractorService.convertFromContractorListToWebContractorListAndSave(transferObject.getContractorList());
+                        webInvoiceService.convertInvoiceListToWebInvoiceListAndSave(transferObject.getInvoiceList());
+
 
                     } catch (IOException e) {
                         e.printStackTrace();
