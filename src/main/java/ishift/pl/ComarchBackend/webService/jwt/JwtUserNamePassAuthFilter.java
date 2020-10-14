@@ -49,12 +49,12 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
-
         Date expDate = jwtConfig.getTokenExpirationDate();
 
         String token = Jwts.builder()
                 .setSubject(authResult.getName())
                 .claim(jwtConfig.authorityMapKey(), authResult.getAuthorities())
+                .claim("access",authResult.getAuthorities().toArray()[1].toString())
                 .setIssuedAt(new Date())
                 .setExpiration(expDate)
                 .signWith(jwtConfig.secretKey())
