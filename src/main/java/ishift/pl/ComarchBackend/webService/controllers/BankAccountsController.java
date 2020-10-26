@@ -2,6 +2,7 @@ package ishift.pl.ComarchBackend.webService.controllers;
 
 import ishift.pl.ComarchBackend.webDataModel.model.BankAccountData;
 import ishift.pl.ComarchBackend.webService.services.BankAccountsControllerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,7 @@ public class BankAccountsController {
 
     private final BankAccountsControllerService bankAccountsControllerService;
 
+    @Autowired
     public BankAccountsController(BankAccountsControllerService bankAccountsControllerService) {
         this.bankAccountsControllerService = bankAccountsControllerService;
     }

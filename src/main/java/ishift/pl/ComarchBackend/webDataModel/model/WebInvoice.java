@@ -29,7 +29,7 @@ public class WebInvoice {
 
     private BigDecimal paymentStatus;
 
-    private Integer docType;
+    private Long docType;
 
     private String currency;
 
@@ -45,7 +45,7 @@ public class WebInvoice {
                       BigDecimal vat,
                       BigDecimal brutto,
                       BigDecimal paymentStatus,
-                      Integer docType,
+                      Long docType,
                       String currency) {
         this.contactorId = contactorId;
         this.contactorName = contactorName;
@@ -132,11 +132,11 @@ public class WebInvoice {
         this.brutto = brutto;
     }
 
-    public Integer getDocType() {
+    public Long getDocType() {
         return docType;
     }
 
-    public void setDocType(Integer docType) {
+    public void setDocType(Long docType) {
         this.docType = docType;
     }
 

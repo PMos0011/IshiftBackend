@@ -1,9 +1,6 @@
 package ishift.pl.ComarchBackend.webDataModel.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
@@ -14,12 +11,13 @@ public class Commodity {
     private Long id;
 
     private String name;
-
     private BigDecimal price;
-
     private BigDecimal vatAmount;
+    private Long measureId;
 
-    private String measure;
+    @ManyToOne
+    @JoinColumn(name="measureId", updatable = false, insertable = false)
+    private Measure measure;
 
     public Long getId() {
         return id;
@@ -53,11 +51,19 @@ public class Commodity {
         this.vatAmount = vatAmount;
     }
 
-    public String getMeasure() {
+    public Long getMeasureId() {
+        return measureId;
+    }
+
+    public void setMeasureId(Long measureId) {
+        this.measureId = measureId;
+    }
+
+    public Measure getMeasure() {
         return measure;
     }
 
-    public void setMeasure(String measure) {
+    public void setMeasure(Measure measure) {
         this.measure = measure;
     }
 }

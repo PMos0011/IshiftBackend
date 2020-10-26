@@ -45,6 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter
                 .antMatchers("/documents").authenticated()
                 .antMatchers("/accOffice").authenticated()
                 .antMatchers("/settings").authenticated()
+                .antMatchers("/invoice").authenticated()
                 .anyRequest().authenticated();
     }
 

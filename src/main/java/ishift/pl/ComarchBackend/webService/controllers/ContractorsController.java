@@ -2,6 +2,7 @@ package ishift.pl.ComarchBackend.webService.controllers;
 
 import ishift.pl.ComarchBackend.webDataModel.model.WebContactor;
 import ishift.pl.ComarchBackend.webService.services.ContractorControllerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,7 @@ public class ContractorsController {
 
     private final ContractorControllerService contractorControllerService;
 
+    @Autowired
     public ContractorsController(ContractorControllerService contractorControllerService) {
         this.contractorControllerService = contractorControllerService;
     }

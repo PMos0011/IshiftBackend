@@ -1,7 +1,9 @@
 package ishift.pl.ComarchBackend.webService.controllers;
 
 import ishift.pl.ComarchBackend.webDataModel.model.Commodity;
+import ishift.pl.ComarchBackend.webDataModel.model.Measure;
 import ishift.pl.ComarchBackend.webService.services.CommodityControllerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,7 @@ public class CommodityController {
 
     private final CommodityControllerService commodityControllerService;
 
+    @Autowired
     public CommodityController(CommodityControllerService commodityControllerService) {
         this.commodityControllerService = commodityControllerService;
     }
@@ -32,5 +35,11 @@ public class CommodityController {
     public ResponseEntity<List<Commodity>> deleteBankAccount(@PathVariable String dbId, @PathVariable Long id) {
 
         return commodityControllerService.deleteCommodity(dbId, id);
+    }
+
+    @GetMapping("/commodity")
+    public ResponseEntity<List<Measure>> getAllMeasures(){
+
+        return commodityControllerService.getAllMeasures();
     }
 }

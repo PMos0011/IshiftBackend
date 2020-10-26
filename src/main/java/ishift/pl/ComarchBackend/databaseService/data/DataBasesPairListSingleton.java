@@ -30,11 +30,16 @@ public class DataBasesPairListSingleton {
         return databasesList;
     }
 
+    public String getFirstDatabaseName(){
+                return databasesList.get(1).getValue();
+    }
+
     public String getDBNameFromKey(String key){
 
         return databasesList.stream()
                 .filter(k->k.getKey().equals(key))
                 .findAny()
-                .orElseThrow().getValue();
+                .orElseThrow(()->new RuntimeException("problem klucza"))
+                .getValue();
     }
 }

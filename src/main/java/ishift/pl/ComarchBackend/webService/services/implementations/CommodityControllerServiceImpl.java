@@ -3,13 +3,16 @@ package ishift.pl.ComarchBackend.webService.services.implementations;
 import ishift.pl.ComarchBackend.databaseService.configuration.ClientDatabaseContextHolder;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import ishift.pl.ComarchBackend.webDataModel.model.Commodity;
+import ishift.pl.ComarchBackend.webDataModel.model.Measure;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.CommodityRepository;
+import ishift.pl.ComarchBackend.webDataModel.repositiories.MeasureRepository;
 import ishift.pl.ComarchBackend.webService.services.CommodityControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -17,11 +20,14 @@ public class CommodityControllerServiceImpl implements CommodityControllerServic
 
     private final CommodityRepository commodityRepository;
     private final DataBasesPairListSingleton dataBasesPairListSingleton;
+    private final MeasureRepository measureRepository;
 
     @Autowired
-    public CommodityControllerServiceImpl(CommodityRepository commodityRepository) {
+    public CommodityControllerServiceImpl(CommodityRepository commodityRepository,
+                                          MeasureRepository measureRepository) {
         this.commodityRepository = commodityRepository;
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(null);
+        this.measureRepository = measureRepository;
     }
     @Override
     public ResponseEntity<List<Commodity>> getAllCommodities(String id) {
@@ -50,5 +56,16 @@ public class CommodityControllerServiceImpl implements CommodityControllerServic
         ClientDatabaseContextHolder.clear();
 
         return getAllCommodities(dbId);
+    }
+
+    @Override
+    public ResponseEntity<List<Measure>> getAllMeasures() {
+        List<Measure> measureList;
+
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getFirstDatabaseName());
+        measureList= measureRepository.findAll();
+        ClientDatabaseContextHolder.clear();
+
+        return new ResponseEntity<>(measureList,HttpStatus.OK);
     }
 }
