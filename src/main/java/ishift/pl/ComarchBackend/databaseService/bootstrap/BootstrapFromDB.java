@@ -77,7 +77,6 @@ public class BootstrapFromDB implements CommandLineRunner {
         System.out.println("from database-service");
 
         saveDataToDatabase();
-
     }
 
     void saveDataToDatabase() {

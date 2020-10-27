@@ -32,7 +32,6 @@ public class InvoiceFromPanel {
     @JoinColumn(name = "invoiceFromPanelId", updatable = false, insertable = false)
     private Set<InvoiceVatTable> invoiceVatTables;
 
-
     @OneToOne(mappedBy = "invoiceFromPanel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private SummaryData summaryData;
 

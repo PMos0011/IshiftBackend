@@ -24,6 +24,12 @@ public class SummaryData {
     private BigDecimal vatAmount;
     private BigDecimal nettoAmount;
     private BigDecimal bruttoAmount;
+    private String vatExemptionLabelNp;
+    @Lob
+    private String vatExemptionValueNp;
+    private String vatExemptionLabelZw;
+    @Lob
+    private String vatExemptionValueZw;
 
     @OneToOne
     @JoinColumn(name = "invoiceFromPanelId", updatable = false, insertable = false)
@@ -137,5 +143,37 @@ public class SummaryData {
 
     public void setInvoiceFromPanel(InvoiceFromPanel invoiceFromPanel) {
         this.invoiceFromPanel = invoiceFromPanel;
+    }
+
+    public String getVatExemptionLabelNp() {
+        return vatExemptionLabelNp;
+    }
+
+    public void setVatExemptionLabelNp(String vatExemptionLabelNp) {
+        this.vatExemptionLabelNp = vatExemptionLabelNp;
+    }
+
+    public String getVatExemptionValueNp() {
+        return vatExemptionValueNp;
+    }
+
+    public void setVatExemptionValueNp(String vatExemptionValueNp) {
+        this.vatExemptionValueNp = vatExemptionValueNp;
+    }
+
+    public String getVatExemptionLabelZw() {
+        return vatExemptionLabelZw;
+    }
+
+    public void setVatExemptionLabelZw(String vatExemptionLabelZw) {
+        this.vatExemptionLabelZw = vatExemptionLabelZw;
+    }
+
+    public String getVatExemptionValueZw() {
+        return vatExemptionValueZw;
+    }
+
+    public void setVatExemptionValueZw(String vatExemptionValueZw) {
+        this.vatExemptionValueZw = vatExemptionValueZw;
     }
 }
