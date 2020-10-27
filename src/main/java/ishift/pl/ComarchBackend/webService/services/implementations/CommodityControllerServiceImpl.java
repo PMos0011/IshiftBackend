@@ -59,10 +59,10 @@ public class CommodityControllerServiceImpl implements CommodityControllerServic
     }
 
     @Override
-    public ResponseEntity<List<Measure>> getAllMeasures() {
+    public ResponseEntity<List<Measure>> getAllMeasures(String id) {
         List<Measure> measureList;
 
-        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getFirstDatabaseName());
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
         measureList= measureRepository.findAll();
         ClientDatabaseContextHolder.clear();
 

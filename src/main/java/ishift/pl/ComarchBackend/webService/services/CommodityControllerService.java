@@ -14,6 +14,6 @@ public interface CommodityControllerService {
 
     ResponseEntity<List<Commodity>> deleteCommodity(String dbId, Long id);
 
-    ResponseEntity<List<Measure>> getAllMeasures();
+    ResponseEntity<List<Measure>> getAllMeasures(String id);
 
 }

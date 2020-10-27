@@ -20,26 +20,26 @@ public class CommodityController {
     }
 
     @GetMapping("/commodity/{id}")
-    public ResponseEntity<List<Commodity>> getAllBankAccounts(@PathVariable String id) {
+    public ResponseEntity<List<Commodity>> getAllCommodities(@PathVariable String id) {
 
         return commodityControllerService.getAllCommodities(id);
     }
 
     @PutMapping("/commodity/{id}")
-    public ResponseEntity<List<Commodity>> saveBankAccount(@PathVariable String id, @RequestBody Commodity commodity) {
+    public ResponseEntity<List<Commodity>> saveCommodity(@PathVariable String id, @RequestBody Commodity commodity) {
 
         return commodityControllerService.saveCommodity(commodity,id);
     }
 
     @DeleteMapping("/commodity/{dbId}/{id}")
-    public ResponseEntity<List<Commodity>> deleteBankAccount(@PathVariable String dbId, @PathVariable Long id) {
+    public ResponseEntity<List<Commodity>> deleteCommodity(@PathVariable String dbId, @PathVariable Long id) {
 
         return commodityControllerService.deleteCommodity(dbId, id);
     }
 
-    @GetMapping("/commodity")
-    public ResponseEntity<List<Measure>> getAllMeasures(){
+    @GetMapping("/commodity/measures/{id}")
+    public ResponseEntity<List<Measure>> getAllMeasures(@PathVariable String id){
 
-        return commodityControllerService.getAllMeasures();
+        return commodityControllerService.getAllMeasures(id);
     }
 }

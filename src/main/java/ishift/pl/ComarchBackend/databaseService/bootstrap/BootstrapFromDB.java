@@ -13,10 +13,8 @@ import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceType;
 import ishift.pl.ComarchBackend.webDataModel.model.Measure;
 import ishift.pl.ComarchBackend.webDataModel.model.Swap;
-import ishift.pl.ComarchBackend.webDataModel.repositiories.InvoiceTypeRepository;
-import ishift.pl.ComarchBackend.webDataModel.repositiories.MeasureRepository;
-import ishift.pl.ComarchBackend.webDataModel.repositiories.SwapRepository;
-import ishift.pl.ComarchBackend.webDataModel.repositiories.WebCompanyDataRepository;
+import ishift.pl.ComarchBackend.webDataModel.model.VatType;
+import ishift.pl.ComarchBackend.webDataModel.repositiories.*;
 import ishift.pl.ComarchBackend.webDataModel.services.BankAccountDataService;
 import ishift.pl.ComarchBackend.webDataModel.services.WebContractorService;
 import ishift.pl.ComarchBackend.webDataModel.services.WebInvoiceService;
@@ -43,6 +41,7 @@ public class BootstrapFromDB implements CommandLineRunner {
     private final WebInvoiceService webInvoiceService;
     private final InvoiceTypeRepository invoiceTypeRepository;
     private final MeasureRepository measureRepository;
+    private final VatTypeRepository vatTypeRepository;
 
     @Autowired
     public BootstrapFromDB(SwapRepository swapRepository, DeclarationDataRepository declarationDataRepository,
@@ -54,7 +53,8 @@ public class BootstrapFromDB implements CommandLineRunner {
                            WebContractorService webContractorService,
                            WebInvoiceService webInvoiceService,
                            InvoiceTypeRepository invoiceTypeRepository,
-                           MeasureRepository measureRepository) {
+                           MeasureRepository measureRepository,
+                           VatTypeRepository vatTypeRepository) {
         this.swapRepository = swapRepository;
         this.dataBasesListSingleton = DataBasesListSingleton.getInstance(dataBaseAccess);
         this.declarationDataRepository = declarationDataRepository;
@@ -66,6 +66,7 @@ public class BootstrapFromDB implements CommandLineRunner {
         this.webInvoiceService = webInvoiceService;
         this.invoiceTypeRepository = invoiceTypeRepository;
         this.measureRepository = measureRepository;
+        this.vatTypeRepository = vatTypeRepository;
 
     }
 
@@ -118,6 +119,7 @@ public class BootstrapFromDB implements CommandLineRunner {
 
                         setInvoiceTypes();
                         setMeasureUnits();
+                        setVatTypes();
 
 
                     } catch (IOException e) {
@@ -181,6 +183,41 @@ public class BootstrapFromDB implements CommandLineRunner {
 
         measureRepository.saveAll(measureList);
 
+    }
+
+    private void setVatTypes(){
+        List<VatType> vatLists = new ArrayList<>();
+
+        vatLists.add(new VatType("27"));
+        vatLists.add(new VatType("25"));
+        vatLists.add(new VatType("24"));
+        vatLists.add(new VatType("23"));
+        vatLists.add(new VatType("22"));
+        vatLists.add(new VatType("21"));
+        vatLists.add(new VatType("20"));
+        vatLists.add(new VatType("19"));
+        vatLists.add(new VatType("17"));
+        vatLists.add(new VatType("16"));
+        vatLists.add(new VatType("15"));
+        vatLists.add(new VatType("10"));
+        vatLists.add(new VatType("9.5"));
+        vatLists.add(new VatType("9"));
+        vatLists.add(new VatType("8.5"));
+        vatLists.add(new VatType("8"));
+        vatLists.add(new VatType("7.7"));
+        vatLists.add(new VatType("7"));
+        vatLists.add(new VatType("6.5"));
+        vatLists.add(new VatType("5.5"));
+        vatLists.add(new VatType("5"));
+        vatLists.add(new VatType("4"));
+        vatLists.add(new VatType("27"));
+        vatLists.add(new VatType("3"));
+        vatLists.add(new VatType("0"));
+        vatLists.add(new VatType("np."));
+        vatLists.add(new VatType("zw."));
+        vatLists.add(new VatType("o.o"));
+
+        vatTypeRepository.saveAll(vatLists);
     }
 
 }

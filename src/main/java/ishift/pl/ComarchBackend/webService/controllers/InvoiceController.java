@@ -2,6 +2,7 @@ package ishift.pl.ComarchBackend.webService.controllers;
 
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceType;
+import ishift.pl.ComarchBackend.webDataModel.model.VatType;
 import ishift.pl.ComarchBackend.webService.services.InvoiceControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,16 @@ public class InvoiceController {
         this.invoiceControllerService = invoiceControllerService;
     }
 
-    @GetMapping("/invoice")
-    public ResponseEntity<List<InvoiceType>> getAllInvoiceType(){
+    @GetMapping("/invoice/{id}")
+    public ResponseEntity<List<InvoiceType>> getAllInvoiceType(@PathVariable String id){
 
-        return invoiceControllerService.getAllInvoiceTypes();
+        return invoiceControllerService.getAllInvoiceTypes(id);
+    }
+
+    @GetMapping("/invoice/vat/{id}")
+    public ResponseEntity<List<VatType>> getVatTypes(@PathVariable String id){
+
+        return invoiceControllerService.getVatTypes(id);
     }
 
     @PutMapping("/invoice/{id}")

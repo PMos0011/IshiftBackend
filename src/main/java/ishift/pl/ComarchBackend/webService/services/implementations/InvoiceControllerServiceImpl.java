@@ -24,6 +24,7 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
     private final SummaryDataRepository summaryDataRepository;
     private final InvoiceFromPanelRepository invoiceFromPanelRepository;
     private final InvoiceVatTableRepository invoiceVatTableRepository;
+    private final VatTypeRepository vatTypeRepository;
 
     @Autowired
     public InvoiceControllerServiceImpl(InvoiceTypeRepository invoiceTypeRepository,
@@ -32,7 +33,8 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
                                         PartyDataRepository partyDataRepository,
                                         SummaryDataRepository summaryDataRepository,
                                         InvoiceFromPanelRepository invoiceFromPanelRepository,
-                                        InvoiceVatTableRepository invoiceVatTableRepository) {
+                                        InvoiceVatTableRepository invoiceVatTableRepository,
+                                        VatTypeRepository vatTypeRepository) {
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(null);
         this.invoiceTypeRepository = invoiceTypeRepository;
         this.webInvoiceRepository = webInvoiceRepository;
@@ -41,13 +43,14 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         this.summaryDataRepository = summaryDataRepository;
         this.invoiceFromPanelRepository = invoiceFromPanelRepository;
         this.invoiceVatTableRepository = invoiceVatTableRepository;
+        this.vatTypeRepository=vatTypeRepository;
     }
 
     @Override
-    public ResponseEntity<List<InvoiceType>> getAllInvoiceTypes() {
+    public ResponseEntity<List<InvoiceType>> getAllInvoiceTypes(String id) {
 
 
-        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getFirstDatabaseName());
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
         List<InvoiceType> invoiceTypeList = invoiceTypeRepository.findAll();
         ClientDatabaseContextHolder.clear();
 
@@ -121,5 +124,15 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         ClientDatabaseContextHolder.clear();
 
         return new ResponseEntity<>("OK", HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<VatType>> getVatTypes(String id) {
+
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
+        List<VatType> vatTypes = vatTypeRepository.findAll();
+        ClientDatabaseContextHolder.clear();
+
+        return new ResponseEntity<>(vatTypes, HttpStatus.OK);
     }
 }

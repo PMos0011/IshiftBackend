@@ -2,13 +2,16 @@ package ishift.pl.ComarchBackend.webService.services;
 
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceType;
+import ishift.pl.ComarchBackend.webDataModel.model.VatType;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface InvoiceControllerService {
 
-    ResponseEntity<List<InvoiceType>> getAllInvoiceTypes();
+    ResponseEntity<List<InvoiceType>> getAllInvoiceTypes(String id);
 
     ResponseEntity <String> saveInvoice(String id, InvoiceDTO invoiceDTO);
+
+    ResponseEntity<List<VatType>> getVatTypes(String id);
 }

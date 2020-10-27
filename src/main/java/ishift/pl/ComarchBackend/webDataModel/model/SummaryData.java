@@ -13,6 +13,7 @@ public class SummaryData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String bankAcc;
+    @Lob
     private String comments;
     private BigDecimal paid;
     private Date paidDay;

@@ -13,11 +13,8 @@ public class Commodity {
     private String name;
     private BigDecimal price;
     private BigDecimal vatAmount;
-    private Long measureId;
+    private String measure;
 
-    @ManyToOne
-    @JoinColumn(name="measureId", updatable = false, insertable = false)
-    private Measure measure;
 
     public Long getId() {
         return id;
@@ -51,19 +48,11 @@ public class Commodity {
         this.vatAmount = vatAmount;
     }
 
-    public Long getMeasureId() {
-        return measureId;
-    }
-
-    public void setMeasureId(Long measureId) {
-        this.measureId = measureId;
-    }
-
-    public Measure getMeasure() {
+    public String getMeasure() {
         return measure;
     }
 
-    public void setMeasure(Measure measure) {
+    public void setMeasure(String measure) {
         this.measure = measure;
     }
 }
