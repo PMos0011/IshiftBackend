@@ -11,7 +11,7 @@ public class CommodityDTO {
     private String measure;
     private String name;
     private BigDecimal price;
-    private BigDecimal vat;
+    private String vat;
 
     public BigDecimal getAmount() {
         return amount;
@@ -53,11 +53,11 @@ public class CommodityDTO {
         this.price = price;
     }
 
-    public BigDecimal getVat() {
+    public String getVat() {
         return vat;
     }
 
-    public void setVat(BigDecimal vat) {
+    public void setVat(String vat) {
         this.vat = vat;
     }
 }

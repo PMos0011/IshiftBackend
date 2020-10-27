@@ -12,7 +12,7 @@ public class InvoiceVatTable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long value;
 
-    private BigDecimal vat;
+    private String vat;
     private BigDecimal vatAmount;
     private BigDecimal nettoAmount;
     private BigDecimal bruttoAmount;
@@ -21,7 +21,7 @@ public class InvoiceVatTable {
     public InvoiceVatTable() {
     }
 
-    public InvoiceVatTable(BigDecimal vat, BigDecimal vatAmount, BigDecimal nettoAmount, BigDecimal bruttoAmount, Long invoiceFromPanelId) {
+    public InvoiceVatTable(String vat, BigDecimal vatAmount, BigDecimal nettoAmount, BigDecimal bruttoAmount, Long invoiceFromPanelId) {
         this.vat = vat;
         this.vatAmount = vatAmount;
         this.nettoAmount = nettoAmount;
@@ -37,11 +37,11 @@ public class InvoiceVatTable {
         this.value = value;
     }
 
-    public BigDecimal getVat() {
+    public String getVat() {
         return vat;
     }
 
-    public void setVat(BigDecimal vat) {
+    public void setVat(String vat) {
         this.vat = vat;
     }
 

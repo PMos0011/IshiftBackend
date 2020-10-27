@@ -12,7 +12,7 @@ public class Commodity {
 
     private String name;
     private BigDecimal price;
-    private BigDecimal vatAmount;
+    private String vatAmount;
     private String measure;
 
 
@@ -40,11 +40,11 @@ public class Commodity {
         this.price = price;
     }
 
-    public BigDecimal getVatAmount() {
+    public String getVatAmount() {
         return vatAmount;
     }
 
-    public void setVatAmount(BigDecimal vatAmount) {
+    public void setVatAmount(String vatAmount) {
         this.vatAmount = vatAmount;
     }
 

@@ -62,7 +62,7 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
 
         ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
 
-        Map<Double, InvoiceVatTable> invoiceVatTableMap = new TreeMap<>();
+        Map<String, InvoiceVatTable> invoiceVatTableMap = new TreeMap<>();
         List<InvoiceCommodity> invoiceCommodities = new ArrayList<>();
 
         final InvoiceFromPanel savedInvoice = invoiceFromPanelRepository.save(invoiceDTO.getHeader());
@@ -80,17 +80,17 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
 
         invoiceCommodities.forEach(commodity -> {
             Optional<InvoiceVatTable> optionalInvoiceVatTable =
-                    Optional.ofNullable(invoiceVatTableMap.get(commodity.getVat().doubleValue()));
+                    Optional.ofNullable(invoiceVatTableMap.get(commodity.getVat()));
 
             optionalInvoiceVatTable.ifPresentOrElse(vatTable -> {
-                invoiceVatTableMap.get(commodity.getVat().doubleValue()).setBruttoAmount(
-                        invoiceVatTableMap.get(commodity.getVat().doubleValue()).getBruttoAmount().add(commodity.getBruttoAmount()));
-                invoiceVatTableMap.get(commodity.getVat().doubleValue()).setNettoAmount(
-                        invoiceVatTableMap.get(commodity.getVat().doubleValue()).getNettoAmount().add(commodity.getNettoAmount()));
-                invoiceVatTableMap.get(commodity.getVat().doubleValue()).setVatAmount(
-                        invoiceVatTableMap.get(commodity.getVat().doubleValue()).getVatAmount().add(commodity.getVatAmount()));
+                invoiceVatTableMap.get(commodity.getVat()).setBruttoAmount(
+                        invoiceVatTableMap.get(commodity.getVat()).getBruttoAmount().add(commodity.getBruttoAmount()));
+                invoiceVatTableMap.get(commodity.getVat()).setNettoAmount(
+                        invoiceVatTableMap.get(commodity.getVat()).getNettoAmount().add(commodity.getNettoAmount()));
+                invoiceVatTableMap.get(commodity.getVat()).setVatAmount(
+                        invoiceVatTableMap.get(commodity.getVat()).getVatAmount().add(commodity.getVatAmount()));
 
-            }, () -> invoiceVatTableMap.put(commodity.getVat().doubleValue(), new InvoiceVatTable(
+            }, () -> invoiceVatTableMap.put(commodity.getVat(), new InvoiceVatTable(
                     commodity.getVat(),
                     commodity.getVatAmount(),
                     commodity.getNettoAmount(),

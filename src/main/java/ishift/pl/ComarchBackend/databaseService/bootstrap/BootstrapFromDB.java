@@ -210,7 +210,6 @@ public class BootstrapFromDB implements CommandLineRunner {
         vatLists.add(new VatType("5.5"));
         vatLists.add(new VatType("5"));
         vatLists.add(new VatType("4"));
-        vatLists.add(new VatType("27"));
         vatLists.add(new VatType("3"));
         vatLists.add(new VatType("0"));
         vatLists.add(new VatType("np."));
