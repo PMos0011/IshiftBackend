@@ -5,6 +5,7 @@ import ishift.pl.ComarchBackend.webDataModel.model.InvoiceType;
 import ishift.pl.ComarchBackend.webDataModel.model.VatType;
 import ishift.pl.ComarchBackend.webService.services.InvoiceControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,5 +37,11 @@ public class InvoiceController {
     public ResponseEntity<String> putInvoice(@PathVariable String id, @RequestBody InvoiceDTO data){
 
         return invoiceControllerService.saveInvoice(id, data);
+    }
+
+    @PutMapping("/test/")
+    public ResponseEntity<Resource> test(@RequestBody InvoiceDTO data){
+
+        return invoiceControllerService.test(data);
     }
 }

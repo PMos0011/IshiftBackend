@@ -23,14 +23,13 @@ public class InvoiceCommodity {
     private BigDecimal bruttoAmount;
     private Long invoiceFromPanelId;
 
-    public InvoiceCommodity(BigDecimal amount, BigDecimal discount, String measure, String name, BigDecimal price, String vat, Long webInvoiceFromPanelId) {
+    public InvoiceCommodity(BigDecimal amount, BigDecimal discount, String measure, String name, BigDecimal price, String vat) {
         this.amount = amount;
         this.discount = discount;
         this.measure = measure;
         this.name = name;
         this.price = price;
         this.vat = vat;
-        this.invoiceFromPanelId = webInvoiceFromPanelId;
 
         BigDecimal numVat;
         try {
@@ -61,7 +60,7 @@ public class InvoiceCommodity {
     }
 
     public BigDecimal getAmount() {
-        return amount;
+        return amount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setAmount(BigDecimal amount) {
@@ -69,7 +68,7 @@ public class InvoiceCommodity {
     }
 
     public BigDecimal getDiscount() {
-        return discount;
+        return discount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setDiscount(BigDecimal discount) {
@@ -93,11 +92,11 @@ public class InvoiceCommodity {
     }
 
     public BigDecimal getPrice() {
-        return price;
+        return price.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setPrice(BigDecimal price) {
-        this.price = price;
+        this.price = price.setScale(2,RoundingMode.HALF_EVEN);;
     }
 
     public String getVat() {
@@ -109,7 +108,7 @@ public class InvoiceCommodity {
     }
 
     public BigDecimal getNettoAmount() {
-        return nettoAmount;
+        return nettoAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setNettoAmount(BigDecimal nettoAmount) {
@@ -117,7 +116,7 @@ public class InvoiceCommodity {
     }
 
     public BigDecimal getVatAmount() {
-        return vatAmount;
+        return vatAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setVatAmount(BigDecimal vatAmount) {
@@ -125,7 +124,7 @@ public class InvoiceCommodity {
     }
 
     public BigDecimal getBruttoAmount() {
-        return bruttoAmount;
+        return bruttoAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setBruttoAmount(BigDecimal bruttoAmount) {

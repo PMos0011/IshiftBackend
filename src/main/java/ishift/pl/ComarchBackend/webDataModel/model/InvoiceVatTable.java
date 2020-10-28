@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 public class InvoiceVatTable {
@@ -21,12 +22,11 @@ public class InvoiceVatTable {
     public InvoiceVatTable() {
     }
 
-    public InvoiceVatTable(String vat, BigDecimal vatAmount, BigDecimal nettoAmount, BigDecimal bruttoAmount, Long invoiceFromPanelId) {
+    public InvoiceVatTable(String vat, BigDecimal vatAmount, BigDecimal nettoAmount, BigDecimal bruttoAmount) {
         this.vat = vat;
         this.vatAmount = vatAmount;
         this.nettoAmount = nettoAmount;
         this.bruttoAmount = bruttoAmount;
-        this.invoiceFromPanelId = invoiceFromPanelId;
     }
 
     public Long getValue() {
@@ -46,7 +46,7 @@ public class InvoiceVatTable {
     }
 
     public BigDecimal getVatAmount() {
-        return vatAmount;
+        return vatAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setVatAmount(BigDecimal vatAmount) {
@@ -54,7 +54,7 @@ public class InvoiceVatTable {
     }
 
     public BigDecimal getNettoAmount() {
-        return nettoAmount;
+        return nettoAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setNettoAmount(BigDecimal nettoAmount) {
@@ -62,7 +62,7 @@ public class InvoiceVatTable {
     }
 
     public BigDecimal getBruttoAmount() {
-        return bruttoAmount;
+        return bruttoAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setBruttoAmount(BigDecimal bruttoAmount) {

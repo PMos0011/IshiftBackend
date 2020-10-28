@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 @Entity
@@ -66,7 +67,10 @@ public class SummaryData {
     }
 
     public BigDecimal getPaid() {
-        return paid;
+        if (paid != null)
+            return paid.setScale(2, RoundingMode.HALF_EVEN);
+
+        return null;
     }
 
     public void setPaid(BigDecimal paid) {
@@ -106,7 +110,7 @@ public class SummaryData {
     }
 
     public BigDecimal getVatAmount() {
-        return vatAmount;
+        return vatAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setVatAmount(BigDecimal vatAmount) {
@@ -114,7 +118,7 @@ public class SummaryData {
     }
 
     public BigDecimal getNettoAmount() {
-        return nettoAmount;
+        return nettoAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setNettoAmount(BigDecimal nettoAmount) {
@@ -122,7 +126,7 @@ public class SummaryData {
     }
 
     public BigDecimal getBruttoAmount() {
-        return bruttoAmount;
+        return bruttoAmount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     public void setBruttoAmount(BigDecimal bruttoAmount) {

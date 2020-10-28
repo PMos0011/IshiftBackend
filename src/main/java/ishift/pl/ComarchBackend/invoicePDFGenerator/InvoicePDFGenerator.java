@@ -5,7 +5,7 @@ import com.itextpdf.text.pdf.*;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceFromPanel;
 import ishift.pl.ComarchBackend.webDataModel.model.PartyData;
 
-import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,10 +36,13 @@ public class InvoicePDFGenerator {
         amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount();
     }
 
-    public void createInvoice() throws IOException, DocumentException {
+    public byte[] createInvoice() throws IOException, DocumentException {
 
         Document document = new Document(PageSize.A4);
-        PdfWriter.getInstance(document, new FileOutputStream(generateInvoicePDfFileName()));
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter.getInstance(document, baos);
+
         document.open();
 
         document.add(headerParagraph());
@@ -70,17 +73,14 @@ public class InvoicePDFGenerator {
 
         document.add(signatures());
 
-        document.close();
-    }
+        byte[] bytes = document.getRole().getBytes();
 
-    private String generateInvoicePDfFileName() {
-        String name = INVOICE_DATA.getInvoiceNumber().replace("/", "");
-        return APP_PATH
-                + "/invoices/"
-                + name
-                + "_"
-                //+ new Date().getTime()
-                + ".pdf";
+        document.close();
+
+        byte[] b= baos.toByteArray();
+        baos.flush();
+        baos.close();
+        return b;
     }
 
     private PartyData getPartyData(Integer partyId) {
@@ -248,10 +248,12 @@ public class InvoicePDFGenerator {
         table.addCell(light10Phrase(sellerData.getCity()));
         table.addCell(light10Phrase(buyerData.getCity()));
         table.addCell(light10Phrase(sellerData.getIdName() + " " + sellerData.getIdValue()));
-        table.addCell(light10Phrase(buyerData.getIdName() + " " + sellerData.getIdValue()));
-        table.addCell(light10Phrase(
-                transformAccountNumber(INVOICE_DATA.getSummaryData().getBankAcc())));
-        table.addCell("");
+        table.addCell(light10Phrase(buyerData.getIdName() + " " + buyerData.getIdValue()));
+        if(INVOICE_DATA.getSummaryData().getBankAcc()!=null) {
+            table.addCell(light10Phrase(
+                    transformAccountNumber(INVOICE_DATA.getSummaryData().getBankAcc())));
+            table.addCell("");
+        }
 
         return table;
     }
@@ -356,7 +358,7 @@ public class InvoicePDFGenerator {
         if (INVOICE_DATA.getSummaryData().getPaid() != null) {
 
             amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount().subtract(
-                    INVOICE_DATA.getSummaryData().getPaid()
+                    INVOICE_DATA.getSummaryData().getPaid().setScale(2, RoundingMode.HALF_EVEN)
             );
             if(INVOICE_DATA.getSummaryData().getPaidDay()!=null){
                 table.addCell(light10Phrase("Data płatności:"));

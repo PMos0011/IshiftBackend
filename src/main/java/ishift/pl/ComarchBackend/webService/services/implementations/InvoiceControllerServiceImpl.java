@@ -1,16 +1,31 @@
 package ishift.pl.ComarchBackend.webService.services.implementations;
 
+import com.itextpdf.text.DocumentException;
 import ishift.pl.ComarchBackend.databaseService.configuration.ClientDatabaseContextHolder;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
+import ishift.pl.ComarchBackend.invoicePDFGenerator.InvoicePDFGenerator;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.*;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.*;
+import ishift.pl.ComarchBackend.webDataModel.services.InvoiceFromPanelService;
 import ishift.pl.ComarchBackend.webService.services.InvoiceControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import org.springframework.core.io.Resource;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Service
@@ -25,6 +40,7 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
     private final InvoiceFromPanelRepository invoiceFromPanelRepository;
     private final InvoiceVatTableRepository invoiceVatTableRepository;
     private final VatTypeRepository vatTypeRepository;
+    private final InvoiceFromPanelService invoiceFromPanelService;
 
     @Autowired
     public InvoiceControllerServiceImpl(InvoiceTypeRepository invoiceTypeRepository,
@@ -34,7 +50,8 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
                                         SummaryDataRepository summaryDataRepository,
                                         InvoiceFromPanelRepository invoiceFromPanelRepository,
                                         InvoiceVatTableRepository invoiceVatTableRepository,
-                                        VatTypeRepository vatTypeRepository) {
+                                        VatTypeRepository vatTypeRepository,
+                                        InvoiceFromPanelService invoiceFromPanelService) {
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(null);
         this.invoiceTypeRepository = invoiceTypeRepository;
         this.webInvoiceRepository = webInvoiceRepository;
@@ -43,7 +60,8 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         this.summaryDataRepository = summaryDataRepository;
         this.invoiceFromPanelRepository = invoiceFromPanelRepository;
         this.invoiceVatTableRepository = invoiceVatTableRepository;
-        this.vatTypeRepository=vatTypeRepository;
+        this.vatTypeRepository = vatTypeRepository;
+        this.invoiceFromPanelService = invoiceFromPanelService;
     }
 
     @Override
@@ -73,8 +91,7 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
                 commodity.getMeasure(),
                 commodity.getName(),
                 commodity.getPrice(),
-                commodity.getVat(),
-                savedInvoice.getId()
+                commodity.getVat()
         )));
         invoiceCommodityRepository.saveAll(invoiceCommodities);
 
@@ -94,8 +111,7 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
                     commodity.getVat(),
                     commodity.getVatAmount(),
                     commodity.getNettoAmount(),
-                    commodity.getBruttoAmount(),
-                    savedInvoice.getId()
+                    commodity.getBruttoAmount()
             )));
         });
 
@@ -108,7 +124,6 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         invoiceDTO.getSeller().setInvoiceFromPanelId(savedInvoice.getId());
         invoiceDTO.getSeller().setPartyId(0);
         partyDataRepository.save(invoiceDTO.getSeller());
-
 
 
         invoiceCommodities.forEach(commodity -> {
@@ -134,5 +149,26 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         ClientDatabaseContextHolder.clear();
 
         return new ResponseEntity<>(vatTypes, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Resource> test(InvoiceDTO invoiceDTO) {
+
+//        ClientDatabaseContextHolder.set("cdn_adam_ma_lej_shdnffbcg");
+//        Optional<InvoiceFromPanel> invoiceFromPanel = invoiceFromPanelRepository.findById(1L);
+//        ClientDatabaseContextHolder.clear();
+
+        InvoiceFromPanel invoiceFromPanel = invoiceFromPanelService.generateInvoiceFromPanelFromInvoiceDTO(invoiceDTO);
+
+        InvoicePDFGenerator invoicePDFGenerator = new InvoicePDFGenerator(invoiceFromPanel);
+        try {
+            byte[] bytes = invoicePDFGenerator.createInvoice();
+            Resource r = new ByteArrayResource(bytes);
+            return new ResponseEntity<>(r, HttpStatus.OK);
+        } catch (IOException | DocumentException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
