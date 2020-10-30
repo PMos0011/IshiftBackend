@@ -39,12 +39,12 @@ public class InvoiceCommodity {
             numVat = new BigDecimal(0);
         }
 
-        this.nettoAmount = price.multiply(amount);
+        this.nettoAmount = price.multiply(amount).setScale(2,RoundingMode.HALF_UP);
         BigDecimal d = discount.divide(new BigDecimal(100), 5, RoundingMode.HALF_UP);
         d = new BigDecimal(1).subtract(d);
-        this.nettoAmount = nettoAmount.multiply(d);
+        this.nettoAmount = nettoAmount.multiply(d).setScale(2,RoundingMode.HALF_UP);
         BigDecimal v= numVat.divide(new BigDecimal(100),4,RoundingMode.HALF_UP);
-        this.vatAmount = nettoAmount.multiply(v);
+        this.vatAmount = nettoAmount.multiply(v).setScale(2,RoundingMode.HALF_UP);
         this.bruttoAmount = this.nettoAmount.add(this.vatAmount);
     }
 

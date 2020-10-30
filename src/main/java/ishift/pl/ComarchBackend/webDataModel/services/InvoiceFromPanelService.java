@@ -17,5 +17,7 @@ public interface InvoiceFromPanelService {
 
     SummaryData generateSummaryDataFromInvoiceDTOAndInvoiceCommodities(InvoiceDTO invoiceDTO,Set<InvoiceCommodity> invoiceCommodities);
 
-    void saveInvoiceFromPanelWithRelationships(InvoiceFromPanel invoiceFromPanel);
+    InvoiceFromPanel saveInvoiceFromPanelFromInvoiceDTOWithRelationships(InvoiceDTO invoiceDTO);
+
+    InvoiceFromPanel saveInvoiceFromPanelWithRelationships(InvoiceFromPanel invoiceFromPanel);
 }

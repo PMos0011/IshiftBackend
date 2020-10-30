@@ -51,13 +51,13 @@ public class InvoicePDFGenerator {
         document.add(createCommodity());
         document.add(summary());
 
-        if(INVOICE_DATA.getSummaryData().getVatExemptionLabelNp()!=null){
+        if (INVOICE_DATA.getSummaryData().getVatExemptionLabelNp() != null) {
             document.add(addParagraphMedium10(INVOICE_DATA.getSummaryData().getVatExemptionLabelNp()));
             document.add(addParagraphLight10(INVOICE_DATA.getSummaryData().getVatExemptionValueNp()));
             document.add(addSpacing(12));
         }
 
-        if(INVOICE_DATA.getSummaryData().getVatExemptionLabelZw()!=null){
+        if (INVOICE_DATA.getSummaryData().getVatExemptionLabelZw() != null) {
             document.add(addParagraphMedium10(INVOICE_DATA.getSummaryData().getVatExemptionLabelZw()));
             document.add(addParagraphLight10(INVOICE_DATA.getSummaryData().getVatExemptionValueZw()));
             document.add(addSpacing(12));
@@ -65,7 +65,7 @@ public class InvoicePDFGenerator {
 
         document.add(paymentSummary());
 
-        if(INVOICE_DATA.getSummaryData().getComments()!=null){
+        if (INVOICE_DATA.getSummaryData().getComments() != null) {
             document.add(addParagraphMedium10("Uwagi:"));
             document.add(addParagraphLight10(INVOICE_DATA.getSummaryData().getComments()));
             document.add(addSpacing(35));
@@ -77,7 +77,7 @@ public class InvoicePDFGenerator {
 
         document.close();
 
-        byte[] b= baos.toByteArray();
+        byte[] b = baos.toByteArray();
         baos.flush();
         baos.close();
         return b;
@@ -116,15 +116,29 @@ public class InvoicePDFGenerator {
         }
     }
 
+    private String formatPartyIdValue(String s) {
+        if (s.length() == 10) {
+            return s.substring(0, 3) + "-"
+                    + s.substring(3, 5) + "-"
+                    + s.substring(5, 7) + "-"
+                    + s.substring(7);
+        } else if (s.length() == 9) {
+            return s.substring(0, 3) + "-"
+                    + s.substring(3, 6) + "-"
+                    + s.substring(6);
+        } else
+            return s;
+    }
+
     private Paragraph addParagraphLight10(String s) {
-        return new Paragraph(s,ROBOTO_LIGHT_10);
+        return new Paragraph(s, ROBOTO_LIGHT_10);
     }
 
     private Paragraph addParagraphMedium10(String s) {
-        return new Paragraph(s,ROBOTO_10);
+        return new Paragraph(s, ROBOTO_10);
     }
 
-    private Paragraph addSpacing(int spacing){
+    private Paragraph addSpacing(int spacing) {
         Paragraph p = new Paragraph();
         p.setSpacingAfter(spacing);
 
@@ -174,7 +188,7 @@ public class InvoicePDFGenerator {
         return cell;
     }
 
-    private PdfPCell signatureCell(String s){
+    private PdfPCell signatureCell(String s) {
 
         PdfPCell cell = new PdfPCell(light10Phrase(s));
         cell.setBorder(0);
@@ -247,9 +261,9 @@ public class InvoicePDFGenerator {
         table.addCell(light10Phrase(buyerData.getStreet()));
         table.addCell(light10Phrase(sellerData.getCity()));
         table.addCell(light10Phrase(buyerData.getCity()));
-        table.addCell(light10Phrase(sellerData.getIdName() + " " + sellerData.getIdValue()));
-        table.addCell(light10Phrase(buyerData.getIdName() + " " + buyerData.getIdValue()));
-        if(INVOICE_DATA.getSummaryData().getBankAcc()!=null) {
+        table.addCell(light10Phrase(sellerData.getIdName() + " " + formatPartyIdValue(sellerData.getIdValue())));
+        table.addCell(light10Phrase(buyerData.getIdName() + " " + formatPartyIdValue(buyerData.getIdValue())));
+        if (INVOICE_DATA.getSummaryData().getBankAcc() != null) {
             table.addCell(light10Phrase(
                     transformAccountNumber(INVOICE_DATA.getSummaryData().getBankAcc())));
             table.addCell("");
@@ -360,10 +374,7 @@ public class InvoicePDFGenerator {
             amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount().subtract(
                     INVOICE_DATA.getSummaryData().getPaid().setScale(2, RoundingMode.HALF_EVEN)
             );
-            if(INVOICE_DATA.getSummaryData().getPaidDay()!=null){
-                table.addCell(light10Phrase("Data płatności:"));
-                table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaidDay()));
-            }
+
 
             table.addCell(light10Phrase("Zapłacono:"));
             table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaid().toString() + " PLN"));
@@ -371,9 +382,21 @@ public class InvoicePDFGenerator {
             table.addCell(light10Phrase("Do zapłaty:"));
             table.addCell(light10Phrase(amountToPay.toString() + " PLN"));
         }
-
+        table.getDefaultCell().setPaddingBottom(15);
         table.addCell(light10Phrase("RAZEM:"));
         table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString() + " PLN"));
+
+        if (INVOICE_DATA.getSummaryData().getPaid() != null) {
+            table.getDefaultCell().setPaddingBottom(2);
+        }
+        if (INVOICE_DATA.getSummaryData().getPaidDay() != null) {
+            table.addCell(light10Phrase("Data płatności:"));
+            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaidDay()));
+        }
+        if (INVOICE_DATA.getSummaryData().getPaymentOptionIdValue() != null) {
+            table.addCell(light10Phrase("Metoda płatności:"));
+            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaymentOptionIdValue()));
+        }
 
         return table;
     }
@@ -395,8 +418,8 @@ public class InvoicePDFGenerator {
         table.addCell(light10Phrase("Słownie:"));
         table.addCell("");
         if (INVOICE_DATA.getSummaryData().getPaymentDay() != null) {
-            table.addCell(light10Phrase("Metoda płatności:"));
-            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaymentOptionIdValue()));
+            table.addCell(light10Phrase("Termin płatności:"));
+            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaymentDay()));
         } else {
             table.addCell("");
             table.addCell("");
@@ -408,17 +431,9 @@ public class InvoicePDFGenerator {
                 + amountToPay.remainder(BigDecimal.ONE).toString().substring(2)
                 + "/100"));
 
-        cell_.setColspan(2);
+        cell_.setColspan(4);
         cell_.setBorder(0);
         table.addCell(cell_);
-
-        if (INVOICE_DATA.getSummaryData().getPaymentDay() != null) {
-            table.addCell(light10Phrase("Termin płatności:"));
-            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaymentDay()));
-        } else {
-            table.addCell("");
-            table.addCell("");
-        }
 
         table.setSpacingAfter(30);
 

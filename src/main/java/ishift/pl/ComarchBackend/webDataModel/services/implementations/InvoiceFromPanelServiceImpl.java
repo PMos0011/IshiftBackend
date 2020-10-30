@@ -2,6 +2,7 @@ package ishift.pl.ComarchBackend.webDataModel.services.implementations;
 
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.*;
+import ishift.pl.ComarchBackend.webDataModel.repositiories.*;
 import ishift.pl.ComarchBackend.webDataModel.services.InvoiceFromPanelService;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,24 @@ import java.util.stream.Collectors;
 
 @Service
 public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
+
+    private final InvoiceFromPanelRepository invoiceFromPanelRepository;
+    private final InvoiceCommodityRepository invoiceCommodityRepository;
+    private final PartyDataRepository partyDataRepository;
+    private final InvoiceVatTableRepository invoiceVatTableRepository;
+    private final SummaryDataRepository summaryDataRepository;
+
+    public InvoiceFromPanelServiceImpl(InvoiceFromPanelRepository invoiceFromPanelRepository,
+                                       InvoiceCommodityRepository invoiceCommodityRepository,
+                                       PartyDataRepository partyDataRepository,
+                                       InvoiceVatTableRepository invoiceVatTableRepository,
+                                       SummaryDataRepository summaryDataRepository) {
+        this.invoiceFromPanelRepository = invoiceFromPanelRepository;
+        this.invoiceCommodityRepository = invoiceCommodityRepository;
+        this.partyDataRepository = partyDataRepository;
+        this.invoiceVatTableRepository = invoiceVatTableRepository;
+        this.summaryDataRepository = summaryDataRepository;
+    }
 
     @Override
     public InvoiceFromPanel generateInvoiceFromPanelFromInvoiceDTO(InvoiceDTO invoiceDTO) {
@@ -91,7 +110,31 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
     }
 
     @Override
-    public void saveInvoiceFromPanelWithRelationships(InvoiceFromPanel invoiceFromPanel) {
+    public InvoiceFromPanel saveInvoiceFromPanelFromInvoiceDTOWithRelationships(InvoiceDTO invoiceDTO) {
 
+        return saveInvoiceFromPanelWithRelationships(
+                generateInvoiceFromPanelFromInvoiceDTO(invoiceDTO)
+        );
     }
+
+    @Override
+    public InvoiceFromPanel saveInvoiceFromPanelWithRelationships(InvoiceFromPanel invoiceFromPanel) {
+
+        final Long invoiceId = invoiceFromPanelRepository.save(invoiceFromPanel).getId();
+
+        invoiceFromPanel.getInvoiceCommodities().forEach(commodity -> commodity.setInvoiceFromPanelId(invoiceId));
+        invoiceCommodityRepository.saveAll(invoiceFromPanel.getInvoiceCommodities());
+
+        invoiceFromPanel.getInvoiceVatTables().forEach(vat->vat.setInvoiceFromPanelId(invoiceId));
+        invoiceVatTableRepository.saveAll(invoiceFromPanel.getInvoiceVatTables());
+
+        invoiceFromPanel.getPartiesData().forEach(data->data.setInvoiceFromPanelId(invoiceId));
+        partyDataRepository.saveAll(invoiceFromPanel.getPartiesData());
+
+        invoiceFromPanel.getSummaryData().setInvoiceFromPanelId(invoiceId);
+        summaryDataRepository.save(invoiceFromPanel.getSummaryData());
+
+        return invoiceFromPanel;
+    }
+
 }

@@ -33,15 +33,21 @@ public class InvoiceController {
         return invoiceControllerService.getVatTypes(id);
     }
 
-    @PutMapping("/invoice/{id}")
+    @PutMapping("/invoice/save/{id}")
     public ResponseEntity<String> putInvoice(@PathVariable String id, @RequestBody InvoiceDTO data){
 
         return invoiceControllerService.saveInvoice(id, data);
     }
 
-    @PutMapping("/test/")
-    public ResponseEntity<Resource> test(@RequestBody InvoiceDTO data){
+    @PutMapping("/invoice/preview")
+    public ResponseEntity<Resource> invoicePreview(@RequestBody InvoiceDTO data){
 
-        return invoiceControllerService.test(data);
+        return invoiceControllerService.invoicePreview(data);
+    }
+
+    @PutMapping("/invoice/save/preview/{id}")
+    public ResponseEntity<Resource> saveAndSendInvoice(@PathVariable String id, @RequestBody InvoiceDTO data){
+
+        return invoiceControllerService.invoiceSaveAndSend(id,data);
     }
 }

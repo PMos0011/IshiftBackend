@@ -9,7 +9,5 @@ public class BootstrapFromWeb implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         System.out.println("from web-services");
-        System.out.println(System.getProperty("user.dir"));
-
     }
 }

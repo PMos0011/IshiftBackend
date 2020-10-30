@@ -16,5 +16,7 @@ public interface InvoiceControllerService {
 
     ResponseEntity<List<VatType>> getVatTypes(String id);
 
-    ResponseEntity<Resource> test(InvoiceDTO invoiceDTO);
+    ResponseEntity<Resource> invoicePreview(InvoiceDTO invoiceDTO);
+
+    ResponseEntity<Resource> invoiceSaveAndSend(String id, InvoiceDTO invoiceDTO);
 }
