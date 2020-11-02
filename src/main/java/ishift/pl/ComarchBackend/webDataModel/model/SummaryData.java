@@ -1,5 +1,6 @@
 package ishift.pl.ComarchBackend.webDataModel.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
@@ -32,6 +33,7 @@ public class SummaryData {
     @Lob
     private String vatExemptionValueZw;
 
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "invoiceFromPanelId", updatable = false, insertable = false)
     private InvoiceFromPanel invoiceFromPanel;

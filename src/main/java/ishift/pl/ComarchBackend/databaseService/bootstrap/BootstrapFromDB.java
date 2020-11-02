@@ -42,6 +42,7 @@ public class BootstrapFromDB implements CommandLineRunner {
     private final InvoiceTypeRepository invoiceTypeRepository;
     private final MeasureRepository measureRepository;
     private final VatTypeRepository vatTypeRepository;
+    private final InvoiceRepository invoiceRepository;
 
     @Autowired
     public BootstrapFromDB(SwapRepository swapRepository, DeclarationDataRepository declarationDataRepository,
@@ -54,7 +55,8 @@ public class BootstrapFromDB implements CommandLineRunner {
                            WebInvoiceService webInvoiceService,
                            InvoiceTypeRepository invoiceTypeRepository,
                            MeasureRepository measureRepository,
-                           VatTypeRepository vatTypeRepository) {
+                           VatTypeRepository vatTypeRepository,
+                           InvoiceRepository invoiceRepository) {
         this.swapRepository = swapRepository;
         this.dataBasesListSingleton = DataBasesListSingleton.getInstance(dataBaseAccess);
         this.declarationDataRepository = declarationDataRepository;
@@ -67,7 +69,7 @@ public class BootstrapFromDB implements CommandLineRunner {
         this.invoiceTypeRepository = invoiceTypeRepository;
         this.measureRepository = measureRepository;
         this.vatTypeRepository = vatTypeRepository;
-
+        this.invoiceRepository = invoiceRepository;
     }
 
     @Override
@@ -116,6 +118,8 @@ public class BootstrapFromDB implements CommandLineRunner {
                         webContractorService.convertFromContractorListToWebContractorListAndSave(transferObject.getContractorList());
                         webInvoiceService.convertInvoiceListToWebInvoiceListAndSave(transferObject.getInvoiceList());
 
+                        invoiceRepository.saveAll(transferObject.getInvoiceList());
+
                         setInvoiceTypes();
                         setMeasureUnits();
                         setVatTypes();
@@ -145,7 +149,7 @@ public class BootstrapFromDB implements CommandLineRunner {
 
         invoiceTypeList.add(new InvoiceType("Faktura sprzedaży", "num/mm/yyyy", "FS"));
         invoiceTypeList.add(new InvoiceType("Faktura korygująca", "num/mm/yyyy", "FKOR"));
-        invoiceTypeList.add(new InvoiceType("Faktura zaliczkowa", "num/mm/yyyy", "FAZL"));
+        invoiceTypeList.add(new InvoiceType("Faktura zaliczkowa", "num/mm/yyyy", "FZAL"));
 
         invoiceTypeRepository.saveAll(invoiceTypeList);
     }

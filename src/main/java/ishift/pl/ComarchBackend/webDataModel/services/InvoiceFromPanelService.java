@@ -1,8 +1,11 @@
 package ishift.pl.ComarchBackend.webDataModel.services;
 
+import ishift.pl.ComarchBackend.dataModel.model.Invoice;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.*;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public interface InvoiceFromPanelService {
@@ -20,4 +23,10 @@ public interface InvoiceFromPanelService {
     InvoiceFromPanel saveInvoiceFromPanelFromInvoiceDTOWithRelationships(InvoiceDTO invoiceDTO);
 
     InvoiceFromPanel saveInvoiceFromPanelWithRelationships(InvoiceFromPanel invoiceFromPanel);
+
+    List<InvoiceFromPanel> getInvoicesFromPanelBetweenIssueDate(Date beginDate, Date endDate);
+
+    InvoiceFromPanel getLastInvoiceFromPanel();
+
+    InvoiceFromPanel getInvoiceFromPanelById(Long id);
 }

@@ -1,9 +1,12 @@
 package ishift.pl.ComarchBackend.webService.services.implementations;
 
 import com.itextpdf.text.DocumentException;
+import ishift.pl.ComarchBackend.dataModel.model.Invoice;
+import ishift.pl.ComarchBackend.dataModel.repository.InvoiceRepository;
 import ishift.pl.ComarchBackend.databaseService.configuration.ClientDatabaseContextHolder;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import ishift.pl.ComarchBackend.invoicePDFGenerator.InvoicePDFGenerator;
+import ishift.pl.ComarchBackend.webDataModel.DTOModel.DatesBetween;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.*;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.*;
@@ -27,15 +30,18 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
     private final InvoiceTypeRepository invoiceTypeRepository;
     private final VatTypeRepository vatTypeRepository;
     private final InvoiceFromPanelService invoiceFromPanelService;
+    private final InvoiceRepository invoiceRepository;
 
     @Autowired
     public InvoiceControllerServiceImpl(InvoiceTypeRepository invoiceTypeRepository,
-                                         VatTypeRepository vatTypeRepository,
-                                        InvoiceFromPanelService invoiceFromPanelService) {
+                                        VatTypeRepository vatTypeRepository,
+                                        InvoiceFromPanelService invoiceFromPanelService,
+                                        InvoiceRepository invoiceRepository) {
         this.dataBasesPairListSingleton = DataBasesPairListSingleton.getInstance(null);
         this.invoiceTypeRepository = invoiceTypeRepository;
         this.vatTypeRepository = vatTypeRepository;
         this.invoiceFromPanelService = invoiceFromPanelService;
+        this.invoiceRepository = invoiceRepository;
     }
 
     @Override
@@ -85,7 +91,40 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         return response;
     }
 
-    private ResponseEntity<Resource> generateResourceResponseEntity(InvoiceFromPanel invoiceFromPanel){
+    @Override
+    public ResponseEntity<List<Invoice>> getAllImportedInvoices(String id, DatesBetween dates) {
+
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
+        List<Invoice> invoices = invoiceRepository.findAllByIssueDateBetween(dates.getBeginDate(), dates.getEndDate());
+        ClientDatabaseContextHolder.clear();
+        return new ResponseEntity<>(invoices, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<InvoiceFromPanel>> getInvoicesFromPanelBetweenIssueDates(String id, DatesBetween dates) {
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
+        List<InvoiceFromPanel> invoices = invoiceFromPanelService.getInvoicesFromPanelBetweenIssueDate(dates.getBeginDate(), dates.getEndDate());
+        ClientDatabaseContextHolder.clear();
+        return new ResponseEntity<>(invoices, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<InvoiceFromPanel> getLastInvoiceFromPanel(String id) {
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
+        InvoiceFromPanel invoice = invoiceFromPanelService.getLastInvoiceFromPanel();
+        ClientDatabaseContextHolder.clear();
+        return new ResponseEntity<>(invoice, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Resource> getInvoiceFromPanelByIdAndSendPDF(String dbId, Long id) {
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(dbId));
+        InvoiceFromPanel invoice = invoiceFromPanelService.getInvoiceFromPanelById(id);
+        ClientDatabaseContextHolder.clear();
+        return generateResourceResponseEntity(invoice);
+    }
+
+    private ResponseEntity<Resource> generateResourceResponseEntity(InvoiceFromPanel invoiceFromPanel) {
         InvoicePDFGenerator invoicePDFGenerator = new InvoicePDFGenerator(invoiceFromPanel);
         try {
             byte[] bytes = invoicePDFGenerator.createInvoice();

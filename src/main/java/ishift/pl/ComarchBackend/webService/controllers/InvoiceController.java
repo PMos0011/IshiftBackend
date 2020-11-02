@@ -1,6 +1,9 @@
 package ishift.pl.ComarchBackend.webService.controllers;
 
+import ishift.pl.ComarchBackend.dataModel.model.Invoice;
+import ishift.pl.ComarchBackend.webDataModel.DTOModel.DatesBetween;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
+import ishift.pl.ComarchBackend.webDataModel.model.InvoiceFromPanel;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceType;
 import ishift.pl.ComarchBackend.webDataModel.model.VatType;
 import ishift.pl.ComarchBackend.webService.services.InvoiceControllerService;
@@ -21,33 +24,58 @@ public class InvoiceController {
         this.invoiceControllerService = invoiceControllerService;
     }
 
-    @GetMapping("/invoice/{id}")
-    public ResponseEntity<List<InvoiceType>> getAllInvoiceType(@PathVariable String id){
+    @GetMapping("/invoice/types/{id}")
+    public ResponseEntity<List<InvoiceType>> getAllInvoiceType(@PathVariable String id) {
 
         return invoiceControllerService.getAllInvoiceTypes(id);
     }
 
+    @GetMapping("/invoice/{id}")
+    ResponseEntity<InvoiceFromPanel> getLastInvoiceFromPanel(@PathVariable String id) {
+        return invoiceControllerService.getLastInvoiceFromPanel(id);
+    }
+
+    @PutMapping("/invoice/{id}")
+    ResponseEntity<List<InvoiceFromPanel>> getInvoicesFromPanel(@PathVariable String id, @RequestBody DatesBetween dates) {
+        return invoiceControllerService.getInvoicesFromPanelBetweenIssueDates(id, dates);
+    }
+
     @GetMapping("/invoice/vat/{id}")
-    public ResponseEntity<List<VatType>> getVatTypes(@PathVariable String id){
+    public ResponseEntity<List<VatType>> getVatTypes(@PathVariable String id) {
 
         return invoiceControllerService.getVatTypes(id);
     }
 
     @PutMapping("/invoice/save/{id}")
-    public ResponseEntity<String> putInvoice(@PathVariable String id, @RequestBody InvoiceDTO data){
+    public ResponseEntity<String> putInvoice(@PathVariable String id, @RequestBody InvoiceDTO data) {
 
         return invoiceControllerService.saveInvoice(id, data);
     }
 
     @PutMapping("/invoice/preview")
-    public ResponseEntity<Resource> invoicePreview(@RequestBody InvoiceDTO data){
+    public ResponseEntity<Resource> invoicePreview(@RequestBody InvoiceDTO data) {
 
         return invoiceControllerService.invoicePreview(data);
     }
 
-    @PutMapping("/invoice/save/preview/{id}")
-    public ResponseEntity<Resource> saveAndSendInvoice(@PathVariable String id, @RequestBody InvoiceDTO data){
+    @GetMapping("/invoice/preview/{dbId}/{id}")
+    public ResponseEntity<Resource> getInvoicePDF(@PathVariable String dbId, @PathVariable Long id) {
+        System.out.println("test");
 
-        return invoiceControllerService.invoiceSaveAndSend(id,data);
+        return invoiceControllerService.getInvoiceFromPanelByIdAndSendPDF(dbId, id);
+    }
+
+
+    @PutMapping("/invoice/save/preview/{id}")
+    public ResponseEntity<Resource> saveAndSendInvoice(@PathVariable String id, @RequestBody InvoiceDTO data) {
+
+        return invoiceControllerService.invoiceSaveAndSend(id, data);
+    }
+
+    @PutMapping("/invoice/imported/{id}")
+    public ResponseEntity<List<Invoice>> getImportedInvoices(@PathVariable String id, @RequestBody DatesBetween dates) {
+        System.out.println(dates.getBeginDate());
+
+        return invoiceControllerService.getAllImportedInvoices(id, dates);
     }
 }

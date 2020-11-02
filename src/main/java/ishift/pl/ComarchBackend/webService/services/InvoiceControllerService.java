@@ -1,6 +1,9 @@
 package ishift.pl.ComarchBackend.webService.services;
 
+import ishift.pl.ComarchBackend.dataModel.model.Invoice;
+import ishift.pl.ComarchBackend.webDataModel.DTOModel.DatesBetween;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
+import ishift.pl.ComarchBackend.webDataModel.model.InvoiceFromPanel;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceType;
 import ishift.pl.ComarchBackend.webDataModel.model.VatType;
 import org.springframework.core.io.Resource;
@@ -19,4 +22,12 @@ public interface InvoiceControllerService {
     ResponseEntity<Resource> invoicePreview(InvoiceDTO invoiceDTO);
 
     ResponseEntity<Resource> invoiceSaveAndSend(String id, InvoiceDTO invoiceDTO);
+
+    ResponseEntity<List<Invoice>> getAllImportedInvoices (String id, DatesBetween dates);
+
+    ResponseEntity<List<InvoiceFromPanel>> getInvoicesFromPanelBetweenIssueDates(String id, DatesBetween dates);
+
+    ResponseEntity<InvoiceFromPanel> getLastInvoiceFromPanel(String id);
+
+    ResponseEntity<Resource> getInvoiceFromPanelByIdAndSendPDF(String dbId, Long id);
 }

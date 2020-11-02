@@ -133,8 +133,22 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
 
         invoiceFromPanel.getSummaryData().setInvoiceFromPanelId(invoiceId);
         summaryDataRepository.save(invoiceFromPanel.getSummaryData());
-
         return invoiceFromPanel;
+    }
+
+    @Override
+    public List<InvoiceFromPanel> getInvoicesFromPanelBetweenIssueDate(Date beginDate, Date endDate) {
+        return invoiceFromPanelRepository.findAllByIssueDateBetween(beginDate,endDate);
+    }
+
+    @Override
+    public InvoiceFromPanel getLastInvoiceFromPanel() {
+        return invoiceFromPanelRepository.findFirstByOrderByIdDesc();
+    }
+
+    @Override
+    public InvoiceFromPanel getInvoiceFromPanelById(Long id) {
+        return invoiceFromPanelRepository.findById(id).get();
     }
 
 }
