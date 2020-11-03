@@ -15,6 +15,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class InvoicePDFGenerator {
 
+//    private final String ROBOTO_FONT = "/home/Comarch/fonts/Roboto-Medium.ttf";
+//    private final String ROBOTO_FONT_BOLD = "/home/Comarch/fonts/Roboto-Bold.ttf";
+//    private final String ROBOTO_FONT_LIGHT = "/home/Comarch/fonts/Roboto-Light.ttf";
+
     private static final String APP_PATH = System.getProperty("user.dir");
 
     private final String ROBOTO_FONT = APP_PATH + "/fonts/Roboto-Medium.ttf";
