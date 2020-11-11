@@ -6,12 +6,21 @@ import java.math.BigDecimal;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CommodityDTO {
+    private Long id;
     private BigDecimal amount;
     private BigDecimal discount;
     private String measure;
     private String name;
     private BigDecimal price;
     private String vat;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public BigDecimal getAmount() {
         return amount;

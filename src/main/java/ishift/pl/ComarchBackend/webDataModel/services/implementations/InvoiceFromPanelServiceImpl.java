@@ -7,6 +7,7 @@ import ishift.pl.ComarchBackend.webDataModel.services.InvoiceFromPanelService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,6 +35,10 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
     public InvoiceFromPanel generateInvoiceFromPanelFromInvoiceDTO(InvoiceDTO invoiceDTO) {
 
         InvoiceFromPanel invoiceFromPanel = invoiceDTO.getHeader();
+
+        Optional <Long> invoiceToCorrectId = Optional.ofNullable(invoiceDTO.getHeader().getId());
+        invoiceToCorrectId.ifPresent((id)->invoiceFromPanel.setInvoiceToCorrect(invoiceFromPanelRepository.findById(id).orElse(null)));
+
         invoiceFromPanel.setInvoiceCommodities(generateInvoiceCommodityFromInvoiceDTO(invoiceDTO));
         invoiceFromPanel.setInvoiceVatTables(generateInvoiceVatTableFromInvoiceCommodities(invoiceFromPanel.getInvoiceCommodities()));
         invoiceFromPanel.setPartiesData(generateInvoicePartiesFromInvoiceDTO(invoiceDTO));
@@ -47,13 +52,16 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
         return invoiceDTO.getCommodities().stream()
                 .map(commodity ->
                         new InvoiceCommodity(
+                                commodity.getId(),
                                 commodity.getAmount(),
                                 commodity.getDiscount(),
                                 commodity.getMeasure(),
                                 commodity.getName(),
                                 commodity.getPrice(),
                                 commodity.getVat())
-                ).collect(Collectors.toSet());
+                ).sorted(Comparator.comparing(InvoiceCommodity::getName))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
     }
 
     @Override
@@ -120,25 +128,60 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
     @Override
     public InvoiceFromPanel saveInvoiceFromPanelWithRelationships(InvoiceFromPanel invoiceFromPanel) {
 
-        final Long invoiceId = invoiceFromPanelRepository.save(invoiceFromPanel).getId();
+        Optional<Long> correctedInvoiceID = Optional.ofNullable(invoiceFromPanel.getId());
+        AtomicReference<Long> invoiceId = new AtomicReference<>();
 
-        invoiceFromPanel.getInvoiceCommodities().forEach(commodity -> commodity.setInvoiceFromPanelId(invoiceId));
+
+        correctedInvoiceID.ifPresentOrElse((correctedId) -> {
+            Optional<InvoiceFromPanel> correctedInvoice = invoiceFromPanelRepository.findById(correctedId);
+            invoiceFromPanel.setId(null);
+            invoiceId.set(invoiceFromPanelRepository.save(invoiceFromPanel).getId());
+
+            //todo orElse
+            correctedInvoice.ifPresent(invoice -> {
+                invoice.setCorrectionId(invoiceId.get());
+                invoiceFromPanelRepository.save(invoice);
+            });
+
+        }, () -> invoiceId.set(invoiceFromPanelRepository.save(invoiceFromPanel).getId()));
+
+
+        invoiceFromPanel.getInvoiceCommodities().forEach(commodity -> {
+                    Optional<Long> correctedCommodityId = Optional.ofNullable(commodity.getId());
+                    AtomicReference<Long> commodityId = new AtomicReference<>();
+                    commodity.setInvoiceFromPanelId(invoiceId.get());
+
+                    correctedCommodityId.ifPresent(correctedId -> {
+                        Optional<InvoiceCommodity> commodityToCorrect = invoiceCommodityRepository.findById(correctedId);
+                        commodity.setId(null);
+                        commodityId.set(invoiceCommodityRepository.save(commodity).getId());
+
+                        //todo OrElse
+                        commodityToCorrect.ifPresent(correctedCommodity -> {
+                            correctedCommodity.setCorrectionId(commodityId.get());
+                            invoiceCommodityRepository.save(correctedCommodity);
+                        });
+                    });
+                }
+        );
+
+
         invoiceCommodityRepository.saveAll(invoiceFromPanel.getInvoiceCommodities());
 
-        invoiceFromPanel.getInvoiceVatTables().forEach(vat->vat.setInvoiceFromPanelId(invoiceId));
+        invoiceFromPanel.getInvoiceVatTables().forEach(vat -> vat.setInvoiceFromPanelId(invoiceId.get()));
         invoiceVatTableRepository.saveAll(invoiceFromPanel.getInvoiceVatTables());
 
-        invoiceFromPanel.getPartiesData().forEach(data->data.setInvoiceFromPanelId(invoiceId));
+        invoiceFromPanel.getPartiesData().forEach(data -> data.setInvoiceFromPanelId(invoiceId.get()));
         partyDataRepository.saveAll(invoiceFromPanel.getPartiesData());
 
-        invoiceFromPanel.getSummaryData().setInvoiceFromPanelId(invoiceId);
+        invoiceFromPanel.getSummaryData().setInvoiceFromPanelId(invoiceId.get());
         summaryDataRepository.save(invoiceFromPanel.getSummaryData());
         return invoiceFromPanel;
     }
 
     @Override
     public List<InvoiceFromPanel> getInvoicesFromPanelBetweenIssueDate(Date beginDate, Date endDate) {
-        return invoiceFromPanelRepository.findAllByIssueDateBetween(beginDate,endDate);
+        return invoiceFromPanelRepository.findAllByIssueDateBetween(beginDate, endDate);
     }
 
     @Override

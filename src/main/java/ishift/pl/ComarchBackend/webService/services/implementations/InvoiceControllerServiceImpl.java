@@ -22,6 +22,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class InvoiceControllerServiceImpl implements InvoiceControllerService {
@@ -75,10 +76,11 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
     }
 
     @Override
-    public ResponseEntity<Resource> invoicePreview(InvoiceDTO invoiceDTO) {
-
-        return generateResourceResponseEntity(
-                invoiceFromPanelService.generateInvoiceFromPanelFromInvoiceDTO(invoiceDTO));
+    public ResponseEntity<Resource> invoicePreview(String id, InvoiceDTO invoiceDTO) {
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
+        InvoiceFromPanel invoiceFromPanel = invoiceFromPanelService.generateInvoiceFromPanelFromInvoiceDTO(invoiceDTO);
+        ClientDatabaseContextHolder.clear();
+        return generateResourceResponseEntity(invoiceFromPanel);
     }
 
     @Override
@@ -125,6 +127,11 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
     }
 
     private ResponseEntity<Resource> generateResourceResponseEntity(InvoiceFromPanel invoiceFromPanel) {
+        invoiceFromPanel.setInvoiceCommodities(
+                sortAlphabeticInvoiceCommoditySet(invoiceFromPanel.getInvoiceCommodities()));
+        invoiceFromPanel.setInvoiceVatTables(sortAlphabeticInvoiceVatTableSet(
+                invoiceFromPanel.getInvoiceVatTables()));
+
         InvoicePDFGenerator invoicePDFGenerator = new InvoicePDFGenerator(invoiceFromPanel);
         try {
             byte[] bytes = invoicePDFGenerator.createInvoice();
@@ -135,5 +142,17 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         }
         //todo error handling
         return null;
+    }
+
+    private Set<InvoiceCommodity> sortAlphabeticInvoiceCommoditySet(Set<InvoiceCommodity> invoiceCommodities){
+        return invoiceCommodities.stream()
+                .sorted(Comparator.comparing(InvoiceCommodity::getName))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private Set<InvoiceVatTable> sortAlphabeticInvoiceVatTableSet(Set<InvoiceVatTable> invoiceVatTables){
+        return invoiceVatTables.stream()
+                .sorted(Comparator.comparing(InvoiceVatTable::getVat))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

@@ -2,7 +2,9 @@ package ishift.pl.ComarchBackend.invoicePDFGenerator;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
+import ishift.pl.ComarchBackend.webDataModel.model.InvoiceCommodity;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceFromPanel;
+import ishift.pl.ComarchBackend.webDataModel.model.InvoiceVatTable;
 import ishift.pl.ComarchBackend.webDataModel.model.PartyData;
 
 import java.io.ByteArrayOutputStream;
@@ -10,8 +12,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class InvoicePDFGenerator {
 
@@ -31,13 +34,16 @@ public class InvoicePDFGenerator {
     private final Font ROBOTO_LIGHT_10 = FontFactory.getFont(ROBOTO_FONT_LIGHT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 10);
     private final Font ROBOTO_LIGHT_9 = FontFactory.getFont(ROBOTO_FONT_LIGHT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 9);
     private final Font ROBOTO_9 = FontFactory.getFont(ROBOTO_FONT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 9);
+    private final Font ROBOTO_LIGHT_7 = FontFactory.getFont(ROBOTO_FONT_LIGHT, BaseFont.IDENTITY_H, BaseFont.EMBEDDED, 7);
 
     private final InvoiceFromPanel INVOICE_DATA;
     private BigDecimal amountToPay;
+    private String summaryPrefix;
 
     public InvoicePDFGenerator(InvoiceFromPanel INVOICE_DATA) {
         this.INVOICE_DATA = INVOICE_DATA;
         amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount();
+        this.summaryPrefix = "Do zapłaty: ";
     }
 
     public byte[] createInvoice() throws IOException, DocumentException {
@@ -77,7 +83,6 @@ public class InvoicePDFGenerator {
 
         document.add(signatures());
 
-        byte[] bytes = document.getRole().getBytes();
 
         document.close();
 
@@ -161,13 +166,24 @@ public class InvoicePDFGenerator {
         return new Phrase(s, ROBOTO_LIGHT_10);
     }
 
+    private Phrase light7Phrase(String s) {
+        return new Phrase(s, ROBOTO_LIGHT_7);
+    }
+
     private Phrase light10Phrase(Date d) {
 
         SimpleDateFormat formatter = new SimpleDateFormat(
                 "dd.MM.yyyy");
 
         String s = formatter.format(d);
-        return new Phrase(s + " r.", ROBOTO_LIGHT_10);
+        return new Phrase(convertDate(d), ROBOTO_LIGHT_10);
+    }
+
+    private String convertDate(Date d) {
+        SimpleDateFormat formatter = new SimpleDateFormat(
+                "dd.MM.yyyy");
+
+        return formatter.format(d) + " r.";
     }
 
     private Phrase medium9Phrase(String s) {
@@ -180,7 +196,6 @@ public class InvoicePDFGenerator {
 
     private PdfPCell commodityTableCell(int align, String s) {
         PdfPCell cell = new PdfPCell(light9Phrase(s));
-
         cell.setBackgroundColor(new GrayColor(0.93f));
         cell.setHorizontalAlignment(align);
         cell.setPaddingLeft(3);
@@ -188,6 +203,7 @@ public class InvoicePDFGenerator {
         cell.setPaddingTop(5);
         cell.setPaddingBottom(5);
         cell.setBorderColor(BaseColor.WHITE);
+        cell.setBorderColorTop(BaseColor.BLACK);
 
         return cell;
     }
@@ -238,7 +254,17 @@ public class InvoicePDFGenerator {
         table.getDefaultCell().setBorder(0);
         table.getDefaultCell().setBackgroundColor(new GrayColor(0.85f));
 
-        table.addCell(bold14Phrase("Faktura numer: " + INVOICE_DATA.getInvoiceNumber()));
+        table.addCell(bold14Phrase(INVOICE_DATA.getInvoiceTypeName() + " " + INVOICE_DATA.getInvoiceNumber()));
+
+        if (INVOICE_DATA.getInvoiceToCorrect() != null) {
+            table.getDefaultCell().setPadding(2);
+            table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
+            table.addCell(light10Phrase("Dotyczy: " + INVOICE_DATA.getInvoiceToCorrect().getInvoiceTypeName()
+                    + " " + INVOICE_DATA.getInvoiceToCorrect().getInvoiceNumber()
+                    + " z dnia: " + convertDate(INVOICE_DATA.getInvoiceToCorrect().getIssueDate())));
+            table.addCell(light10Phrase("Powód korekty: " + INVOICE_DATA.getCorrectionReason()));
+        }
+
         table.setSpacingAfter(35);
 
         return table;
@@ -276,6 +302,16 @@ public class InvoicePDFGenerator {
         return table;
     }
 
+    private PdfPTable commodityNameTable(String s, String name) {
+        float[] columnWidths = {1};
+        PdfPTable table = new PdfPTable(columnWidths);
+        table.getDefaultCell().setBorder(0);
+        table.addCell(light7Phrase(s));
+        table.addCell(light9Phrase(name));
+
+        return table;
+    }
+
     private PdfPTable createCommodity() {
 
         float[] columnWidths = {3, 32, 6, 6, 10, 6, 11, 6, 9, 11};
@@ -294,22 +330,113 @@ public class InvoicePDFGenerator {
         AtomicInteger counter = new AtomicInteger(0);
         INVOICE_DATA.getInvoiceCommodities().forEach(commodity -> {
             counter.getAndIncrement();
-            table.addCell(commodityTableCell(Element.ALIGN_LEFT, String.valueOf((counter.get()))));
-            table.addCell(commodityTableCell(Element.ALIGN_LEFT, commodity.getName()));
-            table.addCell(commodityTableCell(Element.ALIGN_CENTER, commodity.getMeasure()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getAmount().toString()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getPrice().toString()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getDiscount().toString()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getNettoAmount().toString()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
-                    transformVat(commodity.getVat())));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getVatAmount().toString()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getBruttoAmount().toString()));
+
+            table.getDefaultCell().setBackgroundColor(new GrayColor(0.93f));
+
+            if (INVOICE_DATA.getInvoiceToCorrect() != null) {
+                InvoiceCommodity commodityToCorrect =
+                        INVOICE_DATA.getInvoiceToCorrect().getInvoiceCommodities().stream().filter(toCorrect ->
+                                commodityFilter(toCorrect,commodity )
+                        ).findFirst().get();
+
+                table.addCell(commodityTableCell(Element.ALIGN_LEFT, String.valueOf(counter.get())));
+                table.addCell(commodityNameTable("przed korektą:", commodity.getName()));
+                table.addCell(commodityTableCell(Element.ALIGN_CENTER, commodityToCorrect.getMeasure()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodityToCorrect.getAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodityToCorrect.getPrice().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodityToCorrect.getDiscount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodityToCorrect.getNettoAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
+                        transformVat(commodityToCorrect.getVat())));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodityToCorrect.getVatAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodityToCorrect.getBruttoAmount().toString()));
+
+                table.getDefaultCell().setBorderColorTop(BaseColor.WHITE);
+
+                table.addCell(commodityTableCell(Element.ALIGN_LEFT, " "));
+                table.addCell(commodityNameTable("po korekcie:", commodity.getName()));
+                table.addCell(commodityTableCell(Element.ALIGN_CENTER, commodity.getMeasure()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getPrice().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getDiscount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getNettoAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
+                        transformVat(commodity.getVat())));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getVatAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getBruttoAmount().toString()));
+
+
+                table.addCell(commodityTableCell("korekta: "));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(commodityToCorrect.getAmount(), commodity.getAmount())));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(commodityToCorrect.getPrice(), commodity.getPrice())));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(commodityToCorrect.getDiscount(), commodity.getDiscount())));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(commodityToCorrect.getNettoAmount(), commodity.getNettoAmount())));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT, " "));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(commodityToCorrect.getVatAmount(), commodity.getVatAmount())));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(commodityToCorrect.getBruttoAmount(), commodity.getBruttoAmount())));
+
+
+            } else {
+                table.addCell(commodityTableCell(Element.ALIGN_LEFT, String.valueOf(counter.get())));
+                table.addCell(commodityTableCell(Element.ALIGN_LEFT, commodity.getName()));
+                table.addCell(commodityTableCell(Element.ALIGN_CENTER, commodity.getMeasure()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getPrice().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getDiscount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getNettoAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
+                        transformVat(commodity.getVat())));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getVatAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getBruttoAmount().toString()));
+            }
+
         });
 
         table.setSpacingAfter(25);
         return table;
     }
+
+    //todo refactor
+    private PdfPCell commodityTableCell(String s) {
+        PdfPCell cell = new PdfPCell(light9Phrase(s));
+        cell.setColspan(3);
+        cell.setBackgroundColor(new GrayColor(0.85f));
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell.setPaddingLeft(3);
+        cell.setPaddingRight(3);
+        cell.setPaddingTop(5);
+        cell.setPaddingBottom(5);
+        cell.setBorderColor(BaseColor.WHITE);
+
+        return cell;
+    }
+
+    private PdfPCell commodityTableCellWhite(int align, String s) {
+        PdfPCell cell = new PdfPCell(light9Phrase(s));
+        cell.setBackgroundColor(new GrayColor(0.85f));
+        cell.setHorizontalAlignment(align);
+        cell.setPaddingLeft(3);
+        cell.setPaddingRight(3);
+        cell.setPaddingTop(5);
+        cell.setPaddingBottom(5);
+        cell.setBorderColor(BaseColor.WHITE);
+        cell.setBorderColorTop(BaseColor.BLACK);
+
+        return cell;
+    }
+
+    private String calculateCommoditiesSummary(BigDecimal before, BigDecimal after) {
+        return after.subtract(before).toString();
+    }
+
+    //todo
+
 
     private PdfPTable summary() {
 
@@ -327,6 +454,7 @@ public class InvoicePDFGenerator {
 
     private PdfPTable summaryVatTable() {
 
+
         float[] columnWidths = {25, 25, 25, 25};
         PdfPTable table = new PdfPTable(columnWidths);
         table.setWidthPercentage(100);
@@ -340,27 +468,98 @@ public class InvoicePDFGenerator {
             table.addCell(medium9Phrase(s));
         }
 
-        INVOICE_DATA.getInvoiceVatTables().forEach(commodity -> {
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
-                    transformVat(commodity.getVat())));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getNettoAmount().toString()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getVatAmount().toString()));
-            table.addCell(commodityTableCell(Element.ALIGN_RIGHT, commodity.getBruttoAmount().toString()));
-        });
+        //todo
+        if (INVOICE_DATA.getInvoiceToCorrect() != null) {
+            Set<String> allVatRates = new HashSet<>();
+            INVOICE_DATA.getInvoiceToCorrect().getInvoiceVatTables().forEach(VatTable -> allVatRates.add(VatTable.getVat()));
+            INVOICE_DATA.getInvoiceVatTables().forEach(VatTable -> allVatRates.add(VatTable.getVat()));
 
-        table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
+            Set<String> sorted = allVatRates.stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
 
-        table.addCell(medium9Phrase("RAZEM"));
-        table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getNettoAmount().toString()));
-        table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getVatAmount().toString()));
-        table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString()));
+            sorted.forEach(vatRate -> {
 
-        table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
-        table.getDefaultCell().setBorder(0);
+                InvoiceVatTable vatTableToCorrect =
+                        INVOICE_DATA.getInvoiceToCorrect().getInvoiceVatTables().stream()
+                                .filter(vatTable -> vatTable.getVat().equals(vatRate))
+                                .findFirst().orElse(new InvoiceVatTable(
+                                vatRate,
+                                new BigDecimal(0),
+                                new BigDecimal(0),
+                                new BigDecimal(0)
+                        ));
+
+                InvoiceVatTable correctedVatTable =
+                        INVOICE_DATA.getInvoiceVatTables().stream()
+                                .filter(vatTable -> vatTable.getVat().equals(vatRate))
+                                .findFirst().orElse(new InvoiceVatTable(
+                                vatRate,
+                                new BigDecimal(0),
+                                new BigDecimal(0),
+                                new BigDecimal(0)
+                        ));
+
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
+                        transformVat(vatTableToCorrect.getVat())));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, vatTableToCorrect.getNettoAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, vatTableToCorrect.getVatAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, vatTableToCorrect.getBruttoAmount().toString()));
+
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
+                        "po korekcie:"));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, correctedVatTable.getNettoAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, correctedVatTable.getVatAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, correctedVatTable.getBruttoAmount().toString()));
+
+
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        "korekta:"));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(vatTableToCorrect.getNettoAmount(), correctedVatTable.getNettoAmount())));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(vatTableToCorrect.getVatAmount(), correctedVatTable.getVatAmount())));
+                table.addCell(commodityTableCellWhite(Element.ALIGN_RIGHT,
+                        calculateCommoditiesSummary(vatTableToCorrect.getBruttoAmount(), correctedVatTable.getBruttoAmount())));
+
+            });
+
+            table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+
+            table.addCell(medium9Phrase("RAZEM"));
+            table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getNettoAmount(), INVOICE_DATA.getSummaryData().getNettoAmount())));
+            table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getVatAmount(), INVOICE_DATA.getSummaryData().getVatAmount())));
+            table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getBruttoAmount(), INVOICE_DATA.getSummaryData().getBruttoAmount())));
+
+            table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
+            table.getDefaultCell().setBorder(0);
+
+        } else {
+            INVOICE_DATA.getInvoiceVatTables().forEach(invoiceVatTable -> {
+
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT,
+                        transformVat(invoiceVatTable.getVat())));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, invoiceVatTable.getNettoAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, invoiceVatTable.getVatAmount().toString()));
+                table.addCell(commodityTableCell(Element.ALIGN_RIGHT, invoiceVatTable.getBruttoAmount().toString()));
+            });
+
+
+            table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
+
+            table.addCell(medium9Phrase("RAZEM"));
+            table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getNettoAmount().toString()));
+            table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getVatAmount().toString()));
+            table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString()));
+
+            table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
+            table.getDefaultCell().setBorder(0);
+        }
+
         table.addCell("");
         table.addCell("");
         table.addCell("");
         table.addCell("");
+
         return table;
     }
 
@@ -373,22 +572,39 @@ public class InvoicePDFGenerator {
         table.getDefaultCell().setBorder(0);
         table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-        if (INVOICE_DATA.getSummaryData().getPaid() != null) {
+        //todo
+        if (INVOICE_DATA.getInvoiceToCorrect() == null) {
 
-            amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount().subtract(
-                    INVOICE_DATA.getSummaryData().getPaid().setScale(2, RoundingMode.HALF_EVEN)
-            );
+            if (INVOICE_DATA.getSummaryData().getPaid() != null) {
+
+                amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount().subtract(
+                        INVOICE_DATA.getSummaryData().getPaid().setScale(2, RoundingMode.HALF_EVEN)
+                );
+
+                if (amountToPay.doubleValue() < 0) {
+                    summaryPrefix = "Do zwrotu: ";
+                    amountToPay = amountToPay.abs();
+                }
 
 
-            table.addCell(light10Phrase("Zapłacono:"));
-            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaid().toString() + " PLN"));
+                table.addCell(light10Phrase("Zapłacono:"));
+                table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaid().toString() + " PLN"));
 
-            table.addCell(light10Phrase("Do zapłaty:"));
-            table.addCell(light10Phrase(amountToPay.toString() + " PLN"));
+                table.addCell(light10Phrase(summaryPrefix));
+                table.addCell(light10Phrase(amountToPay.toString() + " PLN"));
+            }
         }
+
+
         table.getDefaultCell().setPaddingBottom(15);
         table.addCell(light10Phrase("RAZEM:"));
-        table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString() + " PLN"));
+
+
+        //todo refactor correction
+        if (INVOICE_DATA.getInvoiceToCorrect() != null) {
+            table.addCell(light10Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getBruttoAmount(), INVOICE_DATA.getSummaryData().getBruttoAmount())));
+        } else
+            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString() + " PLN"));
 
         if (INVOICE_DATA.getSummaryData().getPaid() != null) {
             table.getDefaultCell().setPaddingBottom(2);
@@ -412,7 +628,17 @@ public class InvoicePDFGenerator {
         table.setWidthPercentage(100);
         table.getDefaultCell().setBorder(0);
 
-        PdfPCell cell = new PdfPCell(medium12Phrase("Do zapłaty: " + amountToPay.toString() + " PLN"));
+        //todo
+        if (INVOICE_DATA.getInvoiceToCorrect() != null) {
+            amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount().subtract(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getBruttoAmount());
+            if (amountToPay.doubleValue() < 0) {
+                summaryPrefix = "Do zwrotu: ";
+                amountToPay = amountToPay.abs();
+            }
+        }
+
+        PdfPCell cell = new PdfPCell(medium12Phrase(summaryPrefix + amountToPay.toString() + " PLN"));
+
         cell.setBackgroundColor(new GrayColor(0.85f));
         cell.setPadding(6);
         cell.setColspan(4);
@@ -457,5 +683,12 @@ public class InvoicePDFGenerator {
         table.addCell(signatureCell("Osoba upoważniona do odbioru"));
 
         return table;
+    }
+
+    private boolean commodityFilter(InvoiceCommodity commodityToCorrect, InvoiceCommodity correctingCommodity) {
+
+        return commodityToCorrect.getCorrectionId() == null
+                ? commodityToCorrect.getId().equals(correctingCommodity.getId())
+                : commodityToCorrect.getCorrectionId().equals(correctingCommodity.getId());
     }
 }

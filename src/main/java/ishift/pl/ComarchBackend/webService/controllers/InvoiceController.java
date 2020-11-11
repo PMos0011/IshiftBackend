@@ -52,15 +52,14 @@ public class InvoiceController {
         return invoiceControllerService.saveInvoice(id, data);
     }
 
-    @PutMapping("/invoice/preview")
-    public ResponseEntity<Resource> invoicePreview(@RequestBody InvoiceDTO data) {
+    @PostMapping("/invoice/preview/{id}")
+    public ResponseEntity<Resource> invoicePreview(@PathVariable String id, @RequestBody InvoiceDTO data) {
 
-        return invoiceControllerService.invoicePreview(data);
+        return invoiceControllerService.invoicePreview(id, data);
     }
 
     @GetMapping("/invoice/preview/{dbId}/{id}")
     public ResponseEntity<Resource> getInvoicePDF(@PathVariable String dbId, @PathVariable Long id) {
-        System.out.println("test");
 
         return invoiceControllerService.getInvoiceFromPanelByIdAndSendPDF(dbId, id);
     }
@@ -77,5 +76,12 @@ public class InvoiceController {
         System.out.println(dates.getBeginDate());
 
         return invoiceControllerService.getAllImportedInvoices(id, dates);
+    }
+
+    @PutMapping("/invoice/correction/{id}")
+    public ResponseEntity<String> saveInvoiceCorrection(@PathVariable String id, @RequestBody InvoiceDTO data){
+
+        System.out.println(data);
+        return null;
     }
 }

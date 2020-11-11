@@ -22,8 +22,10 @@ public class InvoiceCommodity {
     private BigDecimal vatAmount;
     private BigDecimal bruttoAmount;
     private Long invoiceFromPanelId;
+    private Long correctionId;
 
-    public InvoiceCommodity(BigDecimal amount, BigDecimal discount, String measure, String name, BigDecimal price, String vat) {
+    public InvoiceCommodity(Long id, BigDecimal amount, BigDecimal discount, String measure, String name, BigDecimal price, String vat) {
+        this.id = id;
         this.amount = amount;
         this.discount = discount;
         this.measure = measure;
@@ -137,5 +139,13 @@ public class InvoiceCommodity {
 
     public void setInvoiceFromPanelId(Long invoiceFromPanelId) {
         this.invoiceFromPanelId = invoiceFromPanelId;
+    }
+
+    public Long getCorrectionId() {
+        return correctionId;
+    }
+
+    public void setCorrectionId(Long correctionId) {
+        this.correctionId = correctionId;
     }
 }
