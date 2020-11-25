@@ -3,6 +3,8 @@ package ishift.pl.ComarchBackend.webService.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import ishift.pl.ComarchBackend.webDataModel.model.UserData;
+import ishift.pl.ComarchBackend.webService.services.LoginLogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,10 +24,13 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
 
     private final JwtConfig jwtConfig;
     private final AuthenticationManager authenticationManager;
+    private final LoginLogService loginLogService;
 
-    public JwtUserNamePassAuthFilter(AuthenticationManager authenticationManager, JwtConfig jwtConfig) {
+
+    public JwtUserNamePassAuthFilter(AuthenticationManager authenticationManager, JwtConfig jwtConfig, LoginLogService loginLogService) {
         this.authenticationManager = authenticationManager;
         this.jwtConfig = jwtConfig;
+        this.loginLogService = loginLogService;
     }
 
     @Override
@@ -35,9 +40,13 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
             UserData userData = new ObjectMapper()
                     .readValue(request.getInputStream(), UserData.class);
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(userData.getUserName(), userData.getPassword());
+            Authentication authentication= authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(userData.getUserName(), userData.getPassword()));
 
-            return authenticationManager.authenticate(authentication);
+            if(authentication.isAuthenticated())
+                loginLogService.saveLoginEvent(userData.getUserName(), request);
+
+            return authentication;
 
         } catch (IOException e) {
             //todo

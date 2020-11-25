@@ -181,7 +181,7 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
 
     @Override
     public List<InvoiceFromPanel> getInvoicesFromPanelBetweenIssueDate(Date beginDate, Date endDate) {
-        return invoiceFromPanelRepository.findAllByIssueDateBetween(beginDate, endDate);
+        return invoiceFromPanelRepository.findAllBySellDateBetween(beginDate, endDate);
     }
 
     @Override

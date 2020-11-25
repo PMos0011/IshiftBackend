@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface InvoiceFromPanelRepository extends JpaRepository<InvoiceFromPanel, Long> {
 
-    List<InvoiceFromPanel> findAllByIssueDateBetween(Date beginDate, Date endDate);
+    List<InvoiceFromPanel> findAllBySellDateBetween(Date beginDate, Date endDate);
 
     InvoiceFromPanel findFirstByOrderByIdDesc();
 }
