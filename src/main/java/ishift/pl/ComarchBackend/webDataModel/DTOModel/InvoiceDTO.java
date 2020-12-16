@@ -12,6 +12,7 @@ public class InvoiceDTO {
     private PartyData seller;
     private PartyData buyer;
     private SummaryData summary;
+    private List<Long> usedAdvInvoices;
 
     public List<CommodityDTO> getCommodities() {
         return commodities;
@@ -51,5 +52,13 @@ public class InvoiceDTO {
 
     public void setSummary(SummaryData summary) {
         this.summary = summary;
+    }
+
+    public List<Long> getUsedAdvInvoices() {
+        return usedAdvInvoices;
+    }
+
+    public void setUsedAdvInvoices(List<Long> usedAdvInvoices) {
+        this.usedAdvInvoices = usedAdvInvoices;
     }
 }

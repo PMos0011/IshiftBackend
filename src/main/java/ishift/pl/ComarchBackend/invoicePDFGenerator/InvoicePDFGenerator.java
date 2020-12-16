@@ -435,8 +435,6 @@ public class InvoicePDFGenerator {
         return after.subtract(before).toString();
     }
 
-    //todo
-
 
     private PdfPTable summary() {
 
@@ -573,6 +571,12 @@ public class InvoicePDFGenerator {
         table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_RIGHT);
 
         //todo
+
+        if (amountToPay.doubleValue() < 0) {
+            summaryPrefix = "Do zwrotu: ";
+            amountToPay = amountToPay.abs();
+        }
+
         if (INVOICE_DATA.getInvoiceToCorrect() == null) {
 
             if (INVOICE_DATA.getSummaryData().getPaid() != null) {
@@ -580,11 +584,6 @@ public class InvoicePDFGenerator {
                 amountToPay = INVOICE_DATA.getSummaryData().getBruttoAmount().subtract(
                         INVOICE_DATA.getSummaryData().getPaid().setScale(2, RoundingMode.HALF_EVEN)
                 );
-
-                if (amountToPay.doubleValue() < 0) {
-                    summaryPrefix = "Do zwrotu: ";
-                    amountToPay = amountToPay.abs();
-                }
 
 
                 table.addCell(light10Phrase("Zapłacono:"));

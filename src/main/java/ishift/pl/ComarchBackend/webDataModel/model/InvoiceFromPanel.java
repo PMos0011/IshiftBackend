@@ -24,6 +24,8 @@ public class InvoiceFromPanel {
     private Date sellDate;
     private Long correctionId;
     private String correctionReason;
+    private Integer invoiceTypeId;
+    private String billingInvoice;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "invoiceFromPanelId", updatable = false, insertable = false)
@@ -161,5 +163,22 @@ public class InvoiceFromPanel {
 
     public void setInvoiceToCorrect(InvoiceFromPanel invoiceToCorrect) {
         this.invoiceToCorrect = invoiceToCorrect;
+    }
+
+
+    public Integer getInvoiceTypeId() {
+        return invoiceTypeId;
+    }
+
+    public void setInvoiceTypeId(Integer invoiceTypeId) {
+        this.invoiceTypeId = invoiceTypeId;
+    }
+
+    public String getBillingInvoice() {
+        return billingInvoice;
+    }
+
+    public void setBillingInvoice(String billingInvoice) {
+        this.billingInvoice = billingInvoice;
     }
 }

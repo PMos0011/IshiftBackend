@@ -1,6 +1,7 @@
 package ishift.pl.ComarchBackend.webDataModel.services.implementations;
 
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
+import ishift.pl.ComarchBackend.webDataModel.DTOModel.LastInvoicesDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.*;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.*;
 import ishift.pl.ComarchBackend.webDataModel.services.InvoiceFromPanelService;
@@ -36,8 +37,8 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
 
         InvoiceFromPanel invoiceFromPanel = invoiceDTO.getHeader();
 
-        Optional <Long> invoiceToCorrectId = Optional.ofNullable(invoiceDTO.getHeader().getId());
-        invoiceToCorrectId.ifPresent((id)->invoiceFromPanel.setInvoiceToCorrect(invoiceFromPanelRepository.findById(id).orElse(null)));
+        Optional<Long> invoiceToCorrectId = Optional.ofNullable(invoiceDTO.getHeader().getId());
+        invoiceToCorrectId.ifPresent((id) -> invoiceFromPanel.setInvoiceToCorrect(invoiceFromPanelRepository.findById(id).orElse(null)));
 
         invoiceFromPanel.setInvoiceCommodities(generateInvoiceCommodityFromInvoiceDTO(invoiceDTO));
         invoiceFromPanel.setInvoiceVatTables(generateInvoiceVatTableFromInvoiceCommodities(invoiceFromPanel.getInvoiceCommodities()));
@@ -120,9 +121,26 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
     @Override
     public InvoiceFromPanel saveInvoiceFromPanelFromInvoiceDTOWithRelationships(InvoiceDTO invoiceDTO) {
 
-        return saveInvoiceFromPanelWithRelationships(
+        InvoiceFromPanel invoiceFromPanel = saveInvoiceFromPanelWithRelationships(
                 generateInvoiceFromPanelFromInvoiceDTO(invoiceDTO)
         );
+
+        invoiceDTO.getUsedAdvInvoices().forEach(usedAdvancedInvoice ->
+                invoiceFromPanelRepository.findById(usedAdvancedInvoice)
+                        .ifPresent(invoice -> {
+                            Optional<Long> correctionIdOptional;
+                            AtomicReference<InvoiceFromPanel> subInvoice = new AtomicReference<>(invoice);
+                            do {
+                                subInvoice.get().setBillingInvoice(invoiceFromPanel.getInvoiceNumber());
+                                invoiceFromPanelRepository.save(subInvoice.get());
+                                correctionIdOptional = Optional.ofNullable(subInvoice.get().getCorrectionId());
+                                correctionIdOptional.ifPresent(correctionId ->
+                                        subInvoice.set(invoiceFromPanelRepository.findById(correctionId).get())
+                                );
+                            } while (correctionIdOptional.isPresent());
+                        }));
+
+        return invoiceFromPanel;
     }
 
     @Override
@@ -185,13 +203,23 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
     }
 
     @Override
-    public InvoiceFromPanel getLastInvoiceFromPanel() {
-        return invoiceFromPanelRepository.findFirstByOrderByIdDesc();
+    public LastInvoicesDTO getLastInvoicesFromPanel() {
+
+        return new LastInvoicesDTO(
+                invoiceFromPanelRepository.findFirstByInvoiceTypeIdOrderByIdDesc(1),
+                invoiceFromPanelRepository.findFirstByInvoiceTypeIdOrderByIdDesc(2),
+                invoiceFromPanelRepository.findFirstByInvoiceTypeIdOrderByIdDesc(3)
+        );
     }
 
     @Override
     public InvoiceFromPanel getInvoiceFromPanelById(Long id) {
         return invoiceFromPanelRepository.findById(id).get();
+    }
+
+    @Override
+    public List<InvoiceFromPanel> getAllNotUsedAdvancedInvoices() {
+        return invoiceFromPanelRepository.findAllAdvancedInvoices();
     }
 
 }

@@ -8,6 +8,7 @@ import ishift.pl.ComarchBackend.databaseService.data.DataBasesPairListSingleton;
 import ishift.pl.ComarchBackend.invoicePDFGenerator.InvoicePDFGenerator;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.DatesBetween;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
+import ishift.pl.ComarchBackend.webDataModel.DTOModel.LastInvoicesDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.*;
 import ishift.pl.ComarchBackend.webDataModel.repositiories.*;
 import ishift.pl.ComarchBackend.webDataModel.services.InvoiceFromPanelService;
@@ -111,9 +112,9 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
     }
 
     @Override
-    public ResponseEntity<InvoiceFromPanel> getLastInvoiceFromPanel(String id) {
+    public ResponseEntity<LastInvoicesDTO> getLastInvoiceFromPanel(String id) {
         ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
-        InvoiceFromPanel invoice = invoiceFromPanelService.getLastInvoiceFromPanel();
+        LastInvoicesDTO invoice = invoiceFromPanelService.getLastInvoicesFromPanel();
         ClientDatabaseContextHolder.clear();
         return new ResponseEntity<>(invoice, HttpStatus.OK);
     }
@@ -124,6 +125,14 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
         InvoiceFromPanel invoice = invoiceFromPanelService.getInvoiceFromPanelById(id);
         ClientDatabaseContextHolder.clear();
         return generateResourceResponseEntity(invoice);
+    }
+
+    @Override
+    public ResponseEntity<List<InvoiceFromPanel>> getAllNotUsedAdvancedInvoices(String id) {
+        ClientDatabaseContextHolder.set(dataBasesPairListSingleton.getDBNameFromKey(id));
+        List<InvoiceFromPanel> invoices = invoiceFromPanelService.getAllNotUsedAdvancedInvoices();
+        ClientDatabaseContextHolder.clear();
+        return new ResponseEntity<>(invoices,HttpStatus.OK);
     }
 
     private ResponseEntity<Resource> generateResourceResponseEntity(InvoiceFromPanel invoiceFromPanel) {

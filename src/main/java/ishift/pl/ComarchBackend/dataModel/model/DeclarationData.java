@@ -30,6 +30,9 @@ public class DeclarationData {
     @Column(name = "DkN_TS_Mod")
     private Date modDate;
 
+    @Column(name = "DkN_Wersja")
+    private Integer version;
+
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "DkW_DkNID", updatable = false, insertable = false)
     List<DeclarationDetails> declarationDetails;
@@ -88,5 +91,21 @@ public class DeclarationData {
 
     public void setDeclarationDetails(List<DeclarationDetails> declarationDetails) {
         this.declarationDetails = declarationDetails;
+    }
+
+    public Date getModDate() {
+        return modDate;
+    }
+
+    public void setModDate(Date modDate) {
+        this.modDate = modDate;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

@@ -3,6 +3,7 @@ package ishift.pl.ComarchBackend.webService.controllers;
 import ishift.pl.ComarchBackend.dataModel.model.Invoice;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.DatesBetween;
 import ishift.pl.ComarchBackend.webDataModel.DTOModel.InvoiceDTO;
+import ishift.pl.ComarchBackend.webDataModel.DTOModel.LastInvoicesDTO;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceFromPanel;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceType;
 import ishift.pl.ComarchBackend.webDataModel.model.VatType;
@@ -31,7 +32,7 @@ public class InvoiceController {
     }
 
     @GetMapping("/invoice/{id}")
-    ResponseEntity<InvoiceFromPanel> getLastInvoiceFromPanel(@PathVariable String id) {
+    ResponseEntity<LastInvoicesDTO> getLastInvoiceFromPanel(@PathVariable String id) {
         return invoiceControllerService.getLastInvoiceFromPanel(id);
     }
 
@@ -78,10 +79,10 @@ public class InvoiceController {
         return invoiceControllerService.getAllImportedInvoices(id, dates);
     }
 
-    @PutMapping("/invoice/correction/{id}")
-    public ResponseEntity<String> saveInvoiceCorrection(@PathVariable String id, @RequestBody InvoiceDTO data){
-
-        System.out.println(data);
-        return null;
+    @GetMapping("/advancedInvoice/{id}")
+    ResponseEntity<List<InvoiceFromPanel>> getAllNotUsedAdvancedInvoices(@PathVariable String id) {
+        return invoiceControllerService.getAllNotUsedAdvancedInvoices(id);
     }
+
+
 }
