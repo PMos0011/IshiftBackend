@@ -52,22 +52,26 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
     }
 
     private void createTable(String databaseName, List<String> tableQuery) throws SQLException {
-        String databaseUrl = "jdbc:mysql://localhost:3306/" + databaseName + "?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=TRUE";
-        Connection conn = DriverManager.getConnection(databaseUrl,
+        String databaseUrl = "jdbc:mariadb://localhost:3306/" + databaseName;
+        try (Connection conn = DriverManager.getConnection(databaseUrl,
                 dataBaseAccess.getUser(),
-                dataBaseAccess.getPassword());
-        Statement stmt = conn.createStatement();
+                dataBaseAccess.getPassword())) {
 
-        tableQuery.forEach(query -> {
-            try {
-                stmt.execute(query);
-            } catch (SQLException throwables) {
-                //todo
-                throwables.printStackTrace();
-            }
-        });
+            Statement stmt = conn.createStatement();
 
-        stmt.close();
+            tableQuery.forEach(query -> {
+                try {
+                    stmt.execute(query);
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            });
+            stmt.close();
+
+        } catch (SQLException throwables) {
+            //todo
+            throwables.printStackTrace();
+        }
     }
 
     private List<String> readTableQueryData() {

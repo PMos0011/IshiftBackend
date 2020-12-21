@@ -119,14 +119,24 @@ public class BootstrapFromDB implements CommandLineRunner {
 
                         bankAccountDataService.convertBankAccountListToBankDataAccountListAndSave(transferObject.getBankAccounts());
 
-                        List<DeclarationData> declarationDataList = objectMapper.readValue(
-                                swap.getDeclarationData(), new TypeReference<>() {
-                                });
+                        Optional <byte[]> declarationDataOptional = Optional.ofNullable(swap.getDeclarationData());
 
-                        declarationDataList.forEach(doc -> {
-                            declarationDetailsRepository.saveAll(doc.getDeclarationDetails());
-                            declarationDataRepository.save(doc);
+                        declarationDataOptional.ifPresent(data->{
+                            List<DeclarationData> declarationDataList = null;
+                            try {
+                                declarationDataList = objectMapper.readValue(
+                                        data, new TypeReference<>() {
+                                        });
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                            declarationDataList.forEach(doc -> {
+                                declarationDetailsRepository.saveAll(doc.getDeclarationDetails());
+                                declarationDataRepository.save(doc);
+                            });
                         });
+
 
                         webContractorService.convertFromContractorListToWebContractorListAndSave(transferObject.getContractorList());
                         webInvoiceService.convertInvoiceListToWebInvoiceListAndSave(transferObject.getInvoiceList());

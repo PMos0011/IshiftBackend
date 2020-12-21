@@ -1,5 +1,6 @@
 package ishift.pl.ComarchBackend.databaseService.configuration;
 
+import com.zaxxer.hikari.HikariDataSource;
 import ishift.pl.ComarchBackend.databaseService.data.DataBasesListSingleton;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -24,15 +25,15 @@ public class RoutingConfiguration {
     }
 
     @Bean
-    public DataSource getDataSource()  {
+    public DataSource getDataSource() {
 
         Map<Object, Object> targetDataSources = new HashMap<>();
-        DataSource client0Datasource = clientADatasource("configuration");
+        HikariDataSource client0Datasource = clientADatasource("configuration", false);
 
         System.out.println(dataBasesListSingleton.getDatabasesList());
 
         dataBasesListSingleton.getDatabasesList().forEach(name -> {
-            DataSource clientADatasource = clientADatasource(name);
+            HikariDataSource clientADatasource = clientADatasource(name, true);
             targetDataSources.put(name,
                     clientADatasource);
         });
@@ -44,12 +45,19 @@ public class RoutingConfiguration {
         return clientRoutingDatasource;
     }
 
-    private DataSource clientADatasource(String databaseName) {
+    private HikariDataSource clientADatasource(String databaseName, boolean connectionsLimit) {
 
-        DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-        dataSourceBuilder.url("jdbc:mysql://localhost:3306/" + databaseName + "?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false");
-        dataSourceBuilder.username(dataBaseAccess.getUser());
-        dataSourceBuilder.password(dataBaseAccess.getPassword());
-        return dataSourceBuilder.build();
+        HikariDataSource ds = new HikariDataSource();
+        ds.setJdbcUrl("jdbc:mariadb://localhost:3306/" + databaseName);
+        ds.setUsername(dataBaseAccess.getUser());
+        ds.setPassword(dataBaseAccess.getPassword());
+        if (connectionsLimit) {
+            ds.setMaximumPoolSize(2);
+            ds.setMinimumIdle(0);
+            ds.setIdleTimeout(600000);
+        }
+
+        return ds;
+
     }
 }
