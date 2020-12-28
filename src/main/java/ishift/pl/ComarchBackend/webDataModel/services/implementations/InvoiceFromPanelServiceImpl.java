@@ -19,17 +19,20 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
     private final PartyDataRepository partyDataRepository;
     private final InvoiceVatTableRepository invoiceVatTableRepository;
     private final SummaryDataRepository summaryDataRepository;
+    private final InvoiceExchangeRateRepository invoiceExchangeRateRepository;
 
     public InvoiceFromPanelServiceImpl(InvoiceFromPanelRepository invoiceFromPanelRepository,
                                        InvoiceCommodityRepository invoiceCommodityRepository,
                                        PartyDataRepository partyDataRepository,
                                        InvoiceVatTableRepository invoiceVatTableRepository,
-                                       SummaryDataRepository summaryDataRepository) {
+                                       SummaryDataRepository summaryDataRepository,
+                                       InvoiceExchangeRateRepository invoiceExchangeRateRepository) {
         this.invoiceFromPanelRepository = invoiceFromPanelRepository;
         this.invoiceCommodityRepository = invoiceCommodityRepository;
         this.partyDataRepository = partyDataRepository;
         this.invoiceVatTableRepository = invoiceVatTableRepository;
         this.summaryDataRepository = summaryDataRepository;
+        this.invoiceExchangeRateRepository = invoiceExchangeRateRepository;
     }
 
     @Override
@@ -44,6 +47,7 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
         invoiceFromPanel.setInvoiceVatTables(generateInvoiceVatTableFromInvoiceCommodities(invoiceFromPanel.getInvoiceCommodities()));
         invoiceFromPanel.setPartiesData(generateInvoicePartiesFromInvoiceDTO(invoiceDTO));
         invoiceFromPanel.setSummaryData(generateSummaryDataFromInvoiceDTOAndInvoiceCommodities(invoiceDTO, invoiceFromPanel.getInvoiceCommodities()));
+        invoiceFromPanel.setInvoiceExchangeRate(invoiceDTO.getInvoiceExchangeRate());
         return invoiceFromPanel;
     }
 
@@ -194,6 +198,14 @@ public class InvoiceFromPanelServiceImpl implements InvoiceFromPanelService {
 
         invoiceFromPanel.getSummaryData().setInvoiceFromPanelId(invoiceId.get());
         summaryDataRepository.save(invoiceFromPanel.getSummaryData());
+
+        Optional<InvoiceExchangeRate> invoiceExchangeRateOptional = Optional.ofNullable(invoiceFromPanel.getInvoiceExchangeRate());
+        invoiceExchangeRateOptional.ifPresent(invoiceExchangeRate -> {
+            invoiceExchangeRate.setInvoiceFromPanelId(invoiceId.get());
+            invoiceExchangeRateRepository.save(invoiceExchangeRate);
+        });
+
+
         return invoiceFromPanel;
     }
 

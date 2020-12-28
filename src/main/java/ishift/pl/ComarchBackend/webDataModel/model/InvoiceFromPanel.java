@@ -26,6 +26,7 @@ public class InvoiceFromPanel {
     private String correctionReason;
     private Integer invoiceTypeId;
     private String billingInvoice;
+    private String currency;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "invoiceFromPanelId", updatable = false, insertable = false)
@@ -42,6 +43,9 @@ public class InvoiceFromPanel {
 
     @OneToOne(mappedBy = "invoiceFromPanel", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private SummaryData summaryData;
+
+    @OneToOne(mappedBy = "invoiceFromPanel", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private InvoiceExchangeRate invoiceExchangeRate;
 
     @OneToOne
     @JoinColumn(name = "correctionId", updatable = false, insertable = false)
@@ -180,5 +184,21 @@ public class InvoiceFromPanel {
 
     public void setBillingInvoice(String billingInvoice) {
         this.billingInvoice = billingInvoice;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public InvoiceExchangeRate getInvoiceExchangeRate() {
+        return invoiceExchangeRate;
+    }
+
+    public void setInvoiceExchangeRate(InvoiceExchangeRate invoiceExchangeRate) {
+        this.invoiceExchangeRate = invoiceExchangeRate;
     }
 }

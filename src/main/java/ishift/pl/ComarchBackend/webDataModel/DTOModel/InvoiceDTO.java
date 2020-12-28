@@ -1,5 +1,6 @@
 package ishift.pl.ComarchBackend.webDataModel.DTOModel;
 
+import ishift.pl.ComarchBackend.webDataModel.model.InvoiceExchangeRate;
 import ishift.pl.ComarchBackend.webDataModel.model.InvoiceFromPanel;
 import ishift.pl.ComarchBackend.webDataModel.model.PartyData;
 import ishift.pl.ComarchBackend.webDataModel.model.SummaryData;
@@ -13,6 +14,7 @@ public class InvoiceDTO {
     private PartyData buyer;
     private SummaryData summary;
     private List<Long> usedAdvInvoices;
+    private InvoiceExchangeRate invoiceExchangeRate;
 
     public List<CommodityDTO> getCommodities() {
         return commodities;
@@ -60,5 +62,13 @@ public class InvoiceDTO {
 
     public void setUsedAdvInvoices(List<Long> usedAdvInvoices) {
         this.usedAdvInvoices = usedAdvInvoices;
+    }
+
+    public InvoiceExchangeRate getInvoiceExchangeRate() {
+        return invoiceExchangeRate;
+    }
+
+    public void setInvoiceExchangeRate(InvoiceExchangeRate invoiceExchangeRate) {
+        this.invoiceExchangeRate = invoiceExchangeRate;
     }
 }

@@ -2,10 +2,7 @@ package ishift.pl.ComarchBackend.invoicePDFGenerator;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
-import ishift.pl.ComarchBackend.webDataModel.model.InvoiceCommodity;
-import ishift.pl.ComarchBackend.webDataModel.model.InvoiceFromPanel;
-import ishift.pl.ComarchBackend.webDataModel.model.InvoiceVatTable;
-import ishift.pl.ComarchBackend.webDataModel.model.PartyData;
+import ishift.pl.ComarchBackend.webDataModel.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -336,7 +333,7 @@ public class InvoicePDFGenerator {
             if (INVOICE_DATA.getInvoiceToCorrect() != null) {
                 InvoiceCommodity commodityToCorrect =
                         INVOICE_DATA.getInvoiceToCorrect().getInvoiceCommodities().stream().filter(toCorrect ->
-                                commodityFilter(toCorrect,commodity )
+                                commodityFilter(toCorrect, commodity)
                         ).findFirst().get();
 
                 table.addCell(commodityTableCell(Element.ALIGN_LEFT, String.valueOf(counter.get())));
@@ -435,6 +432,11 @@ public class InvoicePDFGenerator {
         return after.subtract(before).toString();
     }
 
+    private String calculateCommoditiesSummary(BigDecimal before, BigDecimal after, Double multiply) {
+        return after.subtract(before).multiply(BigDecimal.valueOf(multiply))
+                .setScale(2, RoundingMode.HALF_UP).toString();
+    }
+
 
     private PdfPTable summary() {
 
@@ -528,8 +530,8 @@ public class InvoicePDFGenerator {
             table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getVatAmount(), INVOICE_DATA.getSummaryData().getVatAmount())));
             table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getBruttoAmount(), INVOICE_DATA.getSummaryData().getBruttoAmount())));
 
-            table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
-            table.getDefaultCell().setBorder(0);
+            // table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
+            // table.getDefaultCell().setBorder(0);
 
         } else {
             INVOICE_DATA.getInvoiceVatTables().forEach(invoiceVatTable -> {
@@ -549,14 +551,50 @@ public class InvoicePDFGenerator {
             table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getVatAmount().toString()));
             table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString()));
 
-            table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
-            table.getDefaultCell().setBorder(0);
         }
 
-        table.addCell("");
-        table.addCell("");
-        table.addCell("");
-        table.addCell("");
+        Optional.ofNullable(INVOICE_DATA.getInvoiceExchangeRate()).ifPresent(invoiceExchangeRate -> {
+
+            //todo
+            if (INVOICE_DATA.getInvoiceToCorrect() != null) {
+                table.addCell(medium9Phrase("Po przeliczeniu (PLN)"));
+                table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getNettoAmount(),
+                        INVOICE_DATA.getSummaryData().getNettoAmount(),
+                        INVOICE_DATA.getInvoiceExchangeRate().getExchangeRate())));
+                table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getVatAmount(),
+                        INVOICE_DATA.getSummaryData().getVatAmount(),
+                        INVOICE_DATA.getInvoiceExchangeRate().getExchangeRate())));
+                table.addCell(medium9Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getBruttoAmount(),
+                        INVOICE_DATA.getSummaryData().getBruttoAmount(),
+                        INVOICE_DATA.getInvoiceExchangeRate().getExchangeRate())));
+
+            } else {
+
+                table.addCell(medium9Phrase("Po przeliczeniu (PLN)"));
+                table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getNettoAmount()
+                        .multiply(BigDecimal.valueOf(INVOICE_DATA.getInvoiceExchangeRate().getExchangeRate()))
+                        .setScale(2, RoundingMode.HALF_UP).toString()));
+                table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getVatAmount().multiply(BigDecimal.valueOf(INVOICE_DATA.getInvoiceExchangeRate().getExchangeRate()))
+                        .setScale(2, RoundingMode.HALF_UP).toString()));
+                table.addCell(medium9Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().multiply(BigDecimal.valueOf(INVOICE_DATA.getInvoiceExchangeRate().getExchangeRate()))
+                        .setScale(2, RoundingMode.HALF_UP).toString()));
+            }
+
+            table.getDefaultCell().setBackgroundColor(BaseColor.WHITE);
+            table.getDefaultCell().setBorder(0);
+            table.getDefaultCell().setPaddingBottom(1);
+            table.getDefaultCell().setPaddingTop(1);
+
+            table.getDefaultCell().setColspan(4);
+            table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_LEFT);
+            table.addCell(light9Phrase(" Przeliczono po kursie 1 " + INVOICE_DATA.getCurrency() + " = " + INVOICE_DATA.getInvoiceExchangeRate().getExchangeRate() + " PLN"));
+
+            if (!INVOICE_DATA.getInvoiceExchangeRate().getExchangeBasis().equals("własny kurs"))
+                table.addCell(light9Phrase(" tabela kursów średnich NBP nr " + INVOICE_DATA.getInvoiceExchangeRate().getExchangeBasis() + " z dnia " + convertDate(INVOICE_DATA.getInvoiceExchangeRate().getExchangeDate())));
+
+
+        });
+
 
         return table;
     }
@@ -587,10 +625,10 @@ public class InvoicePDFGenerator {
 
 
                 table.addCell(light10Phrase("Zapłacono:"));
-                table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaid().toString() + " PLN"));
+                table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getPaid().toString() + " " + INVOICE_DATA.getCurrency()));
 
                 table.addCell(light10Phrase(summaryPrefix));
-                table.addCell(light10Phrase(amountToPay.toString() + " PLN"));
+                table.addCell(light10Phrase(amountToPay.toString() + " " + INVOICE_DATA.getCurrency()));
             }
         }
 
@@ -601,9 +639,9 @@ public class InvoicePDFGenerator {
 
         //todo refactor correction
         if (INVOICE_DATA.getInvoiceToCorrect() != null) {
-            table.addCell(light10Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getBruttoAmount(), INVOICE_DATA.getSummaryData().getBruttoAmount())));
+            table.addCell(light10Phrase(calculateCommoditiesSummary(INVOICE_DATA.getInvoiceToCorrect().getSummaryData().getBruttoAmount(), INVOICE_DATA.getSummaryData().getBruttoAmount()) + " " + INVOICE_DATA.getCurrency()));
         } else
-            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString() + " PLN"));
+            table.addCell(light10Phrase(INVOICE_DATA.getSummaryData().getBruttoAmount().toString() + " " + INVOICE_DATA.getCurrency()));
 
         if (INVOICE_DATA.getSummaryData().getPaid() != null) {
             table.getDefaultCell().setPaddingBottom(2);
@@ -636,7 +674,7 @@ public class InvoicePDFGenerator {
             }
         }
 
-        PdfPCell cell = new PdfPCell(medium12Phrase(summaryPrefix + amountToPay.toString() + " PLN"));
+        PdfPCell cell = new PdfPCell(medium12Phrase(summaryPrefix + amountToPay.toString() + " " + INVOICE_DATA.getCurrency()));
 
         cell.setBackgroundColor(new GrayColor(0.85f));
         cell.setPadding(6);
