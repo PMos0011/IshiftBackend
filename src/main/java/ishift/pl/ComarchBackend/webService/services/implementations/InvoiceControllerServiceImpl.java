@@ -146,11 +146,11 @@ public class InvoiceControllerServiceImpl implements InvoiceControllerService {
             byte[] bytes = invoicePDFGenerator.createInvoice();
             Resource r = new ByteArrayResource(bytes);
             return new ResponseEntity<>(r, HttpStatus.OK);
-        } catch (IOException | DocumentException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        //todo error handling
-        return null;
+
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
     private Set<InvoiceCommodity> sortAlphabeticInvoiceCommoditySet(Set<InvoiceCommodity> invoiceCommodities){

@@ -2,9 +2,9 @@ package ishift.pl.ComarchBackend.invoicePDFGenerator;
 
 public class NumberToWordsTranslator {
 
-    private String inWords;
+    private static String inWords ="";
 
-    public static String translateNumberToWords(long number) {
+    protected static String translateNumberToWords(long number) {
         final String[] UNITY = {"", "jeden ", "dwa ", "trzy ", "cztery ",
                 "pięć ", "sześć ", "siedem ", "osiem ", "dziewięć "};
 
@@ -35,8 +35,6 @@ public class NumberToWordsTranslator {
                 hundredsAmount,
                 groupColumn,
                 groupRow = 0;
-
-        String inWords = "";
 
         number = Math.abs(number);
 

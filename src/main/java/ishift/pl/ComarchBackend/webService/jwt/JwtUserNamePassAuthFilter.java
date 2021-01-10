@@ -55,7 +55,7 @@ public class JwtUserNamePassAuthFilter extends UsernamePasswordAuthenticationFil
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+    public void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
         Date expDate = jwtConfig.getTokenExpirationDate();
